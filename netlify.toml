@@ -1,0 +1,16 @@
+[build]
+  publish    = "."
+  functions  = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Block the local dev server code from being served live.
+[[redirects]]
+  from   = "/scripts/*"
+  to     = "/404.html"
+  status = 404
+
+# The admin page (/admin/) IS served live so Sam can edit from any browser.
+# The real gate is the Netlify function's ADMIN_PASSWORD check — the JS
+# login is just a first-line deterrent.

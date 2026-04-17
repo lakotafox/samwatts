@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · Sam Watts</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Fraunces:opsz,wght@9..144,400..700&family=Special+Elite&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment:#f4e8d0; --ink:#1c1410; --ink-soft:#3a2817; --ink-wash:#6b5842;
+    --oxblood:#7a0f0a; --oxblood-deep:#4a0604; --brass:#b8763a;
+    --paper:#fbf4df;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:400 15px/1.5 'Fraunces',Georgia,serif;background:#1c1410;color:#e6d8b5;min-height:100vh}
+  a{color:var(--brass)}
+  header{background:#0d0906;border-bottom:1px solid rgba(184,118,58,.25);padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+  header h1{font:400 1.2rem/1 'IM Fell English SC',serif;color:#fff}
+  header .badge{font:400 .7rem/1 'Bebas Neue',sans-serif;letter-spacing:.22em;color:var(--brass);border:1px solid rgba(184,118,58,.4);padding:.3rem .7rem;border-radius:2px}
+  header nav{display:flex;gap:.4rem;margin-left:auto;flex-wrap:wrap}
+  .tab{background:transparent;color:#e6d8b5;border:1px solid rgba(230,216,181,.2);padding:.4rem .9rem;border-radius:2px;cursor:pointer;font:600 .75rem/1 'Bebas Neue',sans-serif;letter-spacing:.22em;text-transform:uppercase;transition:.15s}
+  .tab:hover{border-color:var(--brass);color:var(--brass)}
+  .tab.active{background:var(--brass);color:#0d0906;border-color:var(--brass)}
+  .signout{background:transparent;color:#e6d8b5;border:1px solid rgba(230,216,181,.3);padding:.4rem .8rem;border-radius:2px;cursor:pointer;font:600 .72rem/1 'Bebas Neue',sans-serif;letter-spacing:.22em;text-transform:uppercase}
+
+  main{max-width:900px;margin:0 auto;padding:2rem 1.5rem 5rem}
+
+  /* login */
+  .login-wrap{max-width:420px;margin:6rem auto;padding:2.5rem 2rem;background:var(--parchment);color:var(--ink);border-radius:4px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+  .login-wrap h1{font-family:'IM Fell English SC',serif;font-size:1.6rem;text-align:center;margin-bottom:.4rem;color:var(--ink)}
+  .login-wrap p{text-align:center;font-size:.92rem;color:var(--ink-soft);margin-bottom:1.5rem}
+  .login-wrap input{width:100%;padding:.85rem 1rem;background:rgba(251,244,223,.8);color:var(--ink);border:1px solid rgba(107,88,66,.3);border-radius:2px;font:500 1rem/1.3 'Fraunces',serif;margin-bottom:.85rem}
+  .login-wrap input:focus{outline:none;border-color:var(--oxblood);background:var(--paper)}
+  .login-wrap button{width:100%;padding:.95rem;background:var(--oxblood);color:var(--parchment);border:0;border-radius:2px;font:700 .85rem/1 'Fraunces',serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:.15s}
+  .login-wrap button:hover{background:var(--oxblood-deep)}
+  .login-hint{font-size:.78rem;color:var(--ink-wash);text-align:center;margin-top:1rem;font-family:'Special Elite',monospace}
+
+  /* view panels */
+  .view{display:none}
+  .view.active{display:block}
+
+  .panel{background:#0d0906;border:1px solid rgba(184,118,58,.15);padding:1.5rem 1.75rem;margin-bottom:1.5rem;border-radius:3px}
+  .panel h2{font:400 1.4rem/1.1 'IM Fell English SC',serif;color:#fff;margin-bottom:.35rem}
+  .panel .sub{font-size:.88rem;color:#a89974;margin-bottom:1.25rem}
+
+  .row{display:grid;gap:1rem;margin-bottom:1rem}
+  .row.cols-4{grid-template-columns:80px 1fr 1fr auto}
+  .row.cols-3{grid-template-columns:140px 1fr auto}
+  @media(max-width:680px){
+    .row.cols-4,.row.cols-3{grid-template-columns:1fr}
+  }
+  .field{display:flex;flex-direction:column;gap:.25rem}
+  .field label{font:400 .7rem/1 'Bebas Neue',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#a89974}
+  .field input,.field textarea{background:#1c1410;color:#e6d8b5;border:1px solid rgba(184,118,58,.2);padding:.55rem .7rem;border-radius:2px;font:500 .92rem/1.3 'Fraunces',serif;resize:vertical}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--brass)}
+  .field textarea{min-height:60px}
+
+  .entry{background:rgba(184,118,58,.04);border:1px solid rgba(184,118,58,.12);padding:1rem;border-radius:2px;margin-bottom:.85rem;position:relative}
+  .entry-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:.75rem}
+  .entry-head strong{font:400 1rem/1.2 'IM Fell English SC',serif;color:#fff}
+  .entry-head .when{font:400 .8rem/1 'Special Elite',monospace;color:#a89974}
+  .entry-del{background:transparent;color:#c14;border:1px solid rgba(193,68,68,.4);padding:.3rem .7rem;border-radius:2px;font:600 .7rem/1 'Bebas Neue',sans-serif;letter-spacing:.22em;text-transform:uppercase;cursor:pointer}
+  .entry-del:hover{background:#c14;color:#fff}
+
+  .btn{background:var(--brass);color:#0d0906;border:0;padding:.7rem 1.2rem;border-radius:2px;font:700 .8rem/1 'Bebas Neue',sans-serif;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;transition:.15s}
+  .btn:hover{background:#d9a66a}
+  .btn.ghost{background:transparent;color:var(--brass);border:1px solid var(--brass)}
+  .btn.ghost:hover{background:var(--brass);color:#0d0906}
+  .btn.secondary{background:transparent;color:#e6d8b5;border:1px solid rgba(230,216,181,.3)}
+  .btn-row{display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap}
+
+  .status{padding:.7rem 1rem;background:rgba(106,225,106,.08);border:1px solid rgba(106,225,106,.3);border-radius:2px;color:#6ae16a;font:400 .82rem/1.3 'Special Elite',monospace;margin-bottom:1rem}
+  .status.err{background:rgba(193,68,68,.08);border-color:rgba(193,68,68,.4);color:#e88}
+
+  textarea.paste{width:100%;min-height:120px;background:#1c1410;color:#e6d8b5;border:1px solid rgba(184,118,58,.2);padding:.7rem;border-radius:2px;font:400 .85rem/1.4 'Courier New',monospace}
+
+  /* embedded visual editor (Polaroids tab) — takes over the whole viewport */
+  body[data-active-tab="polaroids"]{overflow:hidden}
+  body[data-active-tab="polaroids"] > header,
+  body[data-active-tab="polaroids"] > main > section:not(#tab-polaroids),
+  body[data-active-tab="polaroids"] #status{display:none !important}
+  body[data-active-tab="polaroids"] main{max-width:none;padding:0;margin:0}
+  body[data-active-tab="polaroids"] #tab-polaroids{position:fixed;inset:0;z-index:999;background:#0f1117;display:flex !important}
+  .embedded-editor{flex:1;width:100%;height:100vh;border:0;display:block;background:#0f1117}
+  /* floating "back to admin" button, only visible when polaroids tab is active */
+  #backToAdmin{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:rgba(13,9,6,.92);color:#e6d8b5;border:1px solid rgba(184,118,58,.4);padding:.45rem .85rem;border-radius:4px;font:600 .75rem/1 'Bebas Neue',sans-serif;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(6px);transition:.15s}
+  #backToAdmin:hover{background:var(--brass);color:#0d0906;border-color:var(--brass)}
+  body[data-active-tab="polaroids"] #backToAdmin{display:block}
+</style>
+</head>
+<body>
+
+<!-- LOGIN VIEW -->
+<div id="loginView" class="view active">
+  <div class="login-wrap">
+    <h1>Admin</h1>
+    <p>Password required to edit the site.</p>
+    <input type="password" id="pwIn" placeholder="Password" autofocus>
+    <button id="pwGo">Sign in</button>
+    <p class="login-hint">demo pw: <code>samwatts</code></p>
+  </div>
+</div>
+
+<!-- floating back button, only visible when Polaroids tab is fullscreen -->
+<button id="backToAdmin" type="button">← back to admin</button>
+
+<!-- ADMIN VIEW -->
+<div id="adminView" class="view">
+  <header>
+    <h1>Admin</h1>
+    <span class="badge">demo mode · localStorage</span>
+    <nav>
+      <button class="tab active" data-tab="events">Events</button>
+      <button class="tab" data-tab="news">News</button>
+      <button class="tab" data-tab="polaroids">Polaroids</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </nav>
+    <button class="signout" id="signOut">Sign out</button>
+  </header>
+
+  <main>
+
+    <!-- EVENTS TAB -->
+    <section id="tab-events" class="tab-panel">
+      <div class="panel">
+        <h2>Upcoming events</h2>
+        <p class="sub">Shown on the dashboard. Newest first. Changes save to localStorage and update live.</p>
+
+        <div id="eventsList"></div>
+
+        <div class="btn-row">
+          <button class="btn ghost" id="addEventBtn">+ Add event</button>
+          <button class="btn" id="saveEvents">Save events</button>
+          <button class="btn secondary" id="resetEvents">Reset to defaults</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEWS TAB -->
+    <section id="tab-news" class="tab-panel" style="display:none">
+      <div class="panel">
+        <h2>News / announcements</h2>
+        <p class="sub">Shown on the homepage. 3 cards max looks best.</p>
+
+        <div id="newsList"></div>
+
+        <div class="btn-row">
+          <button class="btn ghost" id="addNewsBtn">+ Add announcement</button>
+          <button class="btn" id="saveNews">Save news</button>
+          <button class="btn secondary" id="resetNews">Reset to defaults</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- POLAROIDS TAB — visual click-to-replace editor -->
+    <section id="tab-polaroids" class="tab-panel" style="display:none">
+      <iframe id="editorFrame" class="embedded-editor" title="Visual media editor" src="about:blank"></iframe>
+    </section>
+
+    <!-- SETTINGS TAB -->
+    <section id="tab-settings" class="tab-panel" style="display:none">
+      <div class="panel">
+        <h2>Crew links</h2>
+        <p class="sub">WhatsApp invite + Signal backup group. Pasted URLs show up on the dashboard.</p>
+
+        <div class="field" style="margin-bottom:.9rem">
+          <label>WhatsApp invite URL</label>
+          <input type="url" id="linkWhatsapp" placeholder="https://chat.whatsapp.com/XXXXXXXXX">
+        </div>
+        <div class="field" style="margin-bottom:.9rem">
+          <label>Signal group URL</label>
+          <input type="url" id="linkSignal" placeholder="https://signal.group/#XXXXXXXXX">
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="saveLinks">Save links</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Member count</h2>
+        <p class="sub">Shown on the dashboard ("247 in the crew"). Update as the crew grows.</p>
+        <div class="row cols-3">
+          <div class="field"><label>Total m8s</label><input type="number" id="cntTotal" value="247"></div>
+          <div class="field"><label>Online now</label><input type="number" id="cntOnline" value="34"></div>
+          <div class="field" style="align-self:end"><button class="btn" id="saveCounts">Save</button></div>
+        </div>
+      </div>
+    </section>
+
+    <div id="status" class="status" style="display:none"></div>
+  </main>
+</div>
+
+<script>
+// ============ AUTH (demo-mode: plaintext client-side; replace with Supabase in prod) ============
+const DEMO_PW = 'samwatts';
+const authed = () => sessionStorage.getItem('sw-admin') === '1';
+const loginView = document.getElementById('loginView');
+const adminView = document.getElementById('adminView');
+const showLogin = () => { loginView.classList.add('active'); adminView.classList.remove('active'); };
+const showAdmin = () => { loginView.classList.remove('active'); adminView.classList.add('active'); render(); };
+if (authed()) showAdmin();
+document.getElementById('pwGo').onclick = () => {
+  const v = document.getElementById('pwIn').value.trim();
+  if (v === DEMO_PW) { sessionStorage.setItem('sw-admin','1'); showAdmin(); }
+  else { alert('Nope.'); }
+};
+document.getElementById('pwIn').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('pwGo').click(); });
+document.getElementById('signOut').onclick = () => { sessionStorage.removeItem('sw-admin'); showLogin(); };
+
+// ============ TABS ============
+function switchTab(tabName){
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === tabName));
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.getElementById('tab-'+tabName).style.display = (tabName === 'polaroids') ? 'flex' : 'block';
+  document.body.dataset.activeTab = tabName;
+  if (tabName === 'polaroids'){
+    const f = document.getElementById('editorFrame');
+    if (f && f.getAttribute('src') === 'about:blank') f.src = 'editor.html?embedded=1';
+  }
+}
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => switchTab(t.dataset.tab));
+document.getElementById('backToAdmin').onclick = () => switchTab('events');
+
+// ============ STORAGE KEYS ============
+const KEY = {
+  events:    'samwatts-events',
+  news:      'samwatts-news',
+  polaroids: 'samwatts-polaroids',
+  links:     'samwatts-links',
+  counts:    'samwatts-counts',
+};
+
+// ============ DEFAULTS ============
+const DEFAULT_EVENTS = [
+  {date:'2026-04-19', title:'Monday Pledge Live', meta:'7:00am · IG live + recording · 100 pushups after'},
+  {date:'2026-04-26', title:'Bonfire & cookout',  meta:'Sat · 6pm · Sam\'s backyard · bring a chair'},
+  {date:'2026-05-04', title:'Motorbike ride — the long one', meta:'Sun · 9am · meets at the gas station on Main'},
+  {date:'2026-05-17', title:'Camp weekend',       meta:'Fri–Sun · woods upstate · bibles, axes, coffee'},
+];
+const DEFAULT_NEWS = [
+  {date:'Apr 16, 2026', title:'New site is up.',     body:'Threw out the sales pitch. This is just the front door now. Come through, hang with the m8s, take the pledge.'},
+  {date:'Coming soon',  title:'Monday pledge video.', body:'Every Monday at 7am — hand on heart, then 100 pushups. Drop in on IG live or catch the replay.'},
+  {date:'Coming soon',  title:'Crew meetup.',         body:'Lift. Cookout. Bonfire. Bring a friend, bring a bible, bring a bag of candy. Details dropping in the chat.'},
+];
+
+// ============ STATE ============
+let events = JSON.parse(localStorage.getItem(KEY.events)  || 'null') || structuredClone(DEFAULT_EVENTS);
+let news   = JSON.parse(localStorage.getItem(KEY.news)    || 'null') || structuredClone(DEFAULT_NEWS);
+let links  = JSON.parse(localStorage.getItem(KEY.links)   || '{}');
+let counts = JSON.parse(localStorage.getItem(KEY.counts)  || '{}');
+
+// ============ RENDER ============
+function render() {
+  renderEvents();
+  renderNews();
+  document.getElementById('linkWhatsapp').value = links.whatsapp || '';
+  document.getElementById('linkSignal').value   = links.signal   || '';
+  document.getElementById('cntTotal').value     = counts.total   || 247;
+  document.getElementById('cntOnline').value    = counts.online  || 34;
+}
+
+function renderEvents() {
+  const list = document.getElementById('eventsList');
+  list.innerHTML = '';
+  events.forEach((ev, i) => {
+    const row = document.createElement('div');
+    row.className = 'entry';
+    row.innerHTML = `
+      <div class="entry-head">
+        <strong>${escapeHtml(ev.title || '(untitled)')}</strong>
+        <button type="button" class="entry-del" data-i="${i}">Delete</button>
+      </div>
+      <div class="row cols-3">
+        <div class="field"><label>Date</label><input type="date" data-f="date" data-i="${i}" value="${ev.date||''}"></div>
+        <div class="field"><label>Title</label><input type="text" data-f="title" data-i="${i}" value="${escapeAttr(ev.title||'')}"></div>
+        <div></div>
+      </div>
+      <div class="field" style="margin-top:.5rem"><label>Details / meta</label><input type="text" data-f="meta" data-i="${i}" value="${escapeAttr(ev.meta||'')}"></div>
+    `;
+    list.appendChild(row);
+  });
+  // bind inputs
+  list.querySelectorAll('input').forEach(inp => inp.oninput = e => {
+    const i = +e.target.dataset.i, f = e.target.dataset.f;
+    events[i][f] = e.target.value;
+  });
+  list.querySelectorAll('.entry-del').forEach(b => b.onclick = e => {
+    if (!confirm('Remove this event?')) return;
+    events.splice(+e.target.dataset.i, 1);
+    renderEvents();
+  });
+}
+
+function renderNews() {
+  const list = document.getElementById('newsList');
+  list.innerHTML = '';
+  news.forEach((n, i) => {
+    const row = document.createElement('div');
+    row.className = 'entry';
+    row.innerHTML = `
+      <div class="entry-head">
+        <strong>${escapeHtml(n.title || '(untitled)')}</strong>
+        <button type="button" class="entry-del" data-i="${i}">Delete</button>
+      </div>
+      <div class="row cols-3">
+        <div class="field"><label>Date label</label><input type="text" data-f="date" data-i="${i}" value="${escapeAttr(n.date||'')}"></div>
+        <div class="field"><label>Title</label><input type="text" data-f="title" data-i="${i}" value="${escapeAttr(n.title||'')}"></div>
+        <div></div>
+      </div>
+      <div class="field" style="margin-top:.5rem"><label>Body</label><textarea data-f="body" data-i="${i}">${escapeHtml(n.body||'')}</textarea></div>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('input, textarea').forEach(inp => inp.oninput = e => {
+    const i = +e.target.dataset.i, f = e.target.dataset.f;
+    news[i][f] = e.target.value;
+  });
+  list.querySelectorAll('.entry-del').forEach(b => b.onclick = e => {
+    if (!confirm('Remove this announcement?')) return;
+    news.splice(+e.target.dataset.i, 1);
+    renderNews();
+  });
+}
+
+
+// ============ SAVE HANDLERS ============
+function flash(msg, err=false) {
+  const s = document.getElementById('status');
+  s.textContent = msg;
+  s.className = 'status' + (err ? ' err' : '');
+  s.style.display = 'block';
+  clearTimeout(flash._t);
+  flash._t = setTimeout(() => s.style.display = 'none', 3000);
+}
+
+document.getElementById('saveEvents').onclick = () => {
+  localStorage.setItem(KEY.events, JSON.stringify(events));
+  flash(`Saved ${events.length} events.`);
+};
+document.getElementById('addEventBtn').onclick = () => {
+  events.push({date:'', title:'New event', meta:''});
+  renderEvents();
+};
+document.getElementById('resetEvents').onclick = () => {
+  if (!confirm('Reset all events to defaults?')) return;
+  localStorage.removeItem(KEY.events);
+  events = structuredClone(DEFAULT_EVENTS);
+  renderEvents(); flash('Events reset to defaults.');
+};
+
+document.getElementById('saveNews').onclick = () => {
+  localStorage.setItem(KEY.news, JSON.stringify(news));
+  flash(`Saved ${news.length} announcements.`);
+};
+document.getElementById('addNewsBtn').onclick = () => {
+  news.push({date:'Today', title:'New announcement', body:''});
+  renderNews();
+};
+document.getElementById('resetNews').onclick = () => {
+  if (!confirm('Reset announcements to defaults?')) return;
+  localStorage.removeItem(KEY.news);
+  news = structuredClone(DEFAULT_NEWS);
+  renderNews(); flash('News reset to defaults.');
+};
+
+document.getElementById('saveLinks').onclick = () => {
+  links = {
+    whatsapp: document.getElementById('linkWhatsapp').value.trim(),
+    signal:   document.getElementById('linkSignal').value.trim(),
+  };
+  localStorage.setItem(KEY.links, JSON.stringify(links));
+  flash('Links saved.');
+};
+document.getElementById('saveCounts').onclick = () => {
+  counts = {
+    total:  +document.getElementById('cntTotal').value  || 0,
+    online: +document.getElementById('cntOnline').value || 0,
+  };
+  localStorage.setItem(KEY.counts, JSON.stringify(counts));
+  flash('Counts saved.');
+};
+
+// ============ UTIL ============
+function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));}
+function escapeAttr(s){return escapeHtml(s);}
+</script>
+</body>
+</html>

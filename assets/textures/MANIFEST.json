@@ -1,0 +1,391 @@
+{
+  "categories": {
+    "A_parchment_pattern": "Category A - Seamless tileable parchment/paper patterns (transparenttextures.com, CC BY 3.0)",
+    "B_parchment_photo": "Category B - Full parchment/aged-paper background photos (Wikimedia Commons)",
+    "C_stain": "Category C - Coffee stain PNGs with transparent backgrounds (OnlyGFX)",
+    "burn": "Burn marks, scorch marks, torn-and-burned edges - Indiana-Jones / treasure-map fire-damaged look",
+    "parchment": "Parchment / aged paper base textures for background layers",
+    "stain": "Coffee/ink/water stain overlays",
+    "wrinkle": "Paper wrinkle/crease/fold overlays - layer via mix-blend-mode: multiply on parchment base"
+  },
+  "files": {
+    "parchment-paper-fibers.png": {
+      "category": "A",
+      "description": "Seamless paper fibers tileable pattern",
+      "format": "PNG",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com / Atle Mo",
+      "attribution": "Pattern by Atle Mo via transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 72778,
+      "source_url": "https://www.transparenttextures.com/patterns/paper-fibers.png"
+    },
+    "parchment-rice-paper.png": {
+      "category": "A",
+      "description": "Seamless rice paper tileable pattern",
+      "format": "PNG",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com",
+      "attribution": "transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 131654,
+      "source_url": "https://www.transparenttextures.com/patterns/rice-paper.png"
+    },
+    "parchment-rice-paper-2.png": {
+      "category": "A",
+      "description": "Seamless rice paper #2 tileable pattern",
+      "format": "PNG",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com",
+      "attribution": "transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 313490,
+      "source_url": "https://www.transparenttextures.com/patterns/rice-paper-2.png"
+    },
+    "parchment-old-mathematics.png": {
+      "category": "A",
+      "description": "Seamless old mathematics paper tileable pattern (faint equations)",
+      "format": "PNG RGBA",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com",
+      "attribution": "transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 52084,
+      "source_url": "https://www.transparenttextures.com/patterns/old-mathematics.png"
+    },
+    "parchment-cardboard.png": {
+      "category": "A",
+      "description": "Seamless cardboard tileable pattern",
+      "format": "PNG",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com",
+      "attribution": "transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 203431,
+      "source_url": "https://www.transparenttextures.com/patterns/cardboard.png"
+    },
+    "parchment-natural-paper.png": {
+      "category": "A",
+      "description": "Seamless natural paper tileable pattern",
+      "format": "PNG",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com",
+      "attribution": "transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 101491,
+      "source_url": "https://www.transparenttextures.com/patterns/natural-paper.png"
+    },
+    "parchment-cream-paper.png": {
+      "category": "A",
+      "description": "Seamless cream paper tileable pattern",
+      "format": "PNG",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com",
+      "attribution": "transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 11803,
+      "source_url": "https://www.transparenttextures.com/patterns/cream-paper.png"
+    },
+    "parchment-light-paper-fibers.png": {
+      "category": "A",
+      "description": "Seamless light paper fibers tileable pattern",
+      "format": "PNG",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com",
+      "attribution": "transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 52970,
+      "source_url": "https://www.transparenttextures.com/patterns/light-paper-fibers.png"
+    },
+    "parchment-old-map.png": {
+      "category": "A",
+      "description": "Seamless old map tileable pattern",
+      "format": "PNG",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com",
+      "attribution": "transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 21447,
+      "source_url": "https://www.transparenttextures.com/patterns/old-map.png"
+    },
+    "parchment-worn-dots.png": {
+      "category": "A",
+      "description": "Seamless worn dots tileable pattern",
+      "format": "PNG",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com",
+      "attribution": "transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 10997,
+      "source_url": "https://www.transparenttextures.com/patterns/worn-dots.png"
+    },
+    "parchment-groovepaper.png": {
+      "category": "A",
+      "description": "Seamless groove paper tileable pattern",
+      "format": "PNG",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com",
+      "attribution": "transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 36340,
+      "source_url": "https://www.transparenttextures.com/patterns/groovepaper.png"
+    },
+    "parchment-textured-paper.png": {
+      "category": "A",
+      "description": "Seamless textured paper tileable pattern",
+      "format": "PNG",
+      "license": "CC BY 3.0 - attribution required: transparenttextures.com",
+      "attribution": "transparenttextures.com (CC BY 3.0)",
+      "size_bytes": 139859,
+      "source_url": "https://www.transparenttextures.com/patterns/textured-paper.png"
+    },
+    "parchment-photo-1.jpg": {
+      "category": "B",
+      "description": "Warm aged/stained paper photo - classic treasure-map parchment look (2978x2240)",
+      "format": "JPEG",
+      "license": "CC BY 2.0 - attribution required",
+      "attribution": "Parchment.00.jpg by Wikimedia Commons contributor (CC BY 2.0)",
+      "size_bytes": 5609643,
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/84/Parchment.00.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Parchment.00.jpg"
+    },
+    "parchment-photo-2.jpg": {
+      "category": "B",
+      "description": "Cream parchment with scratch/scuff marks and darker deckled edges (3300x2550)",
+      "format": "JPEG",
+      "license": "Wikimedia Commons - check source page",
+      "attribution": "Pergament.0.jpg via Wikimedia Commons",
+      "size_bytes": 11984914,
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Pergament.0.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Pergament.0.jpg"
+    },
+    "parchment-photo-3.jpg": {
+      "category": "B",
+      "description": "Tileable parchment scan 1024x1024 - cleaner cream paper",
+      "format": "JPEG",
+      "license": "Wikimedia Commons - check source page",
+      "attribution": "Pergament.1.jpg via Wikimedia Commons",
+      "size_bytes": 166062,
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/58/Pergament.1.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Pergament.1.jpg"
+    },
+    "parchment-photo-4.jpg": {
+      "category": "B",
+      "description": "Tileable parchment scan 1024x1024 - alternate crop, lighter",
+      "format": "JPEG",
+      "license": "Wikimedia Commons - check source page",
+      "attribution": "Pergament.2.jpg via Wikimedia Commons",
+      "size_bytes": 74491,
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/fd/Pergament.2.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Pergament.2.jpg"
+    },
+    "parchment-photo-5.jpg": {
+      "category": "B",
+      "description": "Dark vintage book-page texture with vignette - moody aged-paper look (2848x4272)",
+      "format": "JPEG",
+      "license": "CC BY 2.0 (per Wikimedia Commons) - attribution recommended",
+      "attribution": "'Free dark vintage paper page texture for layers' via Wikimedia Commons / Flickr",
+      "size_bytes": 3291352,
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Free_dark_vintage_paper_page_texture_for_layers_(2982207584).jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Free_dark_vintage_paper_page_texture_for_layers_(2982207584).jpg"
+    },
+    "stain-1.png": {
+      "category": "C",
+      "description": "Coffee splatter #1 - large brown splatter with droplets (2000x1486)",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "attribution": "OnlyGFX.com (no attribution required)",
+      "transparent": true,
+      "size_bytes": 1172956,
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2016/08/coffee-splatter-1.png",
+      "source_page": "https://www.onlygfx.com/10-coffee-stains-splatter-png-transparent/"
+    },
+    "stain-2.png": {
+      "category": "C",
+      "description": "Coffee splatter #3 - bigger heavy splatter (2562x2018)",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "attribution": "OnlyGFX.com (no attribution required)",
+      "transparent": true,
+      "size_bytes": 3260334,
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2016/08/coffee-splatter-3.png",
+      "source_page": "https://www.onlygfx.com/10-coffee-stains-splatter-png-transparent/"
+    },
+    "stain-3.png": {
+      "category": "C",
+      "description": "Coffee splatter #5 - medium splatter with fine droplets (2000x1688)",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "attribution": "OnlyGFX.com (no attribution required)",
+      "transparent": true,
+      "size_bytes": 1184884,
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2016/08/coffee-splatter-5.png",
+      "source_page": "https://www.onlygfx.com/10-coffee-stains-splatter-png-transparent/"
+    },
+    "stain-4.png": {
+      "category": "C",
+      "description": "Coffee cup ring stain #1 - classic mug ring on paper (2700x2548)",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "attribution": "OnlyGFX.com (no attribution required)",
+      "transparent": true,
+      "size_bytes": 4291370,
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2016/05/cup-coffee-stain-1.png",
+      "source_page": "https://www.onlygfx.com/8-coffee-stain-png-image-transparent/"
+    },
+    "stain-5.png": {
+      "category": "C",
+      "description": "Coffee cup ring stain #3 - smudged/broken ring stain (2700x2436)",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "attribution": "OnlyGFX.com (no attribution required)",
+      "transparent": true,
+      "size_bytes": 3316561,
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2016/05/cup-coffee-stain-3.png",
+      "source_page": "https://www.onlygfx.com/8-coffee-stain-png-image-transparent/"
+    },
+    "stain-6.png": {
+      "category": "C",
+      "description": "Coffee cup ring stain #5 - partial ring with drips (2448x2280)",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "attribution": "OnlyGFX.com (no attribution required)",
+      "transparent": true,
+      "size_bytes": 2719046,
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2016/05/cup-coffee-stain-5.png",
+      "source_page": "https://www.onlygfx.com/8-coffee-stain-png-image-transparent/"
+    },
+    "burn-1.png": {
+      "category": "burn",
+      "description": "Burnt old paper frame with charred edges PNG transparent (#1 of set of 4) - whole-page burn border",
+      "dimensions": "1961x1352",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 1705332,
+      "source_page": "https://www.onlygfx.com/4-burn-old-paper-frame-png-transparent/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2017/12/burnt-old-paper-frame-1.png",
+      "transparent": true
+    },
+    "burn-2.png": {
+      "category": "burn",
+      "description": "Burnt old paper frame with charred edges PNG transparent (#2 of set of 4) - whole-page burn border",
+      "dimensions": "2000x1445",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 1791233,
+      "source_page": "https://www.onlygfx.com/4-burn-old-paper-frame-png-transparent/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2017/12/burnt-old-paper-frame-2.png",
+      "transparent": true
+    },
+    "burn-3.png": {
+      "category": "burn",
+      "description": "Burnt old paper frame with charred edges PNG transparent (#3 of set of 4) - heavier scorching",
+      "dimensions": "2000x1378",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 2145626,
+      "source_page": "https://www.onlygfx.com/4-burn-old-paper-frame-png-transparent/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2017/12/burnt-old-paper-frame-3.png",
+      "transparent": true
+    },
+    "burn-4.png": {
+      "category": "burn",
+      "description": "Burnt paper banner/label PNG transparent - torn-and-burned banner strip",
+      "dimensions": "1800x427",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 1002371,
+      "source_page": "https://www.onlygfx.com/13-burnt-paper-label-banner-png-transparent/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2017/09/burnt-paper-banner-label-1.png",
+      "transparent": true
+    },
+    "burn-5.png": {
+      "category": "burn",
+      "description": "Burnt paper banner/label PNG transparent - scorched patch",
+      "dimensions": "1250x505",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 1007703,
+      "source_page": "https://www.onlygfx.com/13-burnt-paper-label-banner-png-transparent/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2017/09/burnt-paper-banner-label-5.png",
+      "transparent": true
+    },
+    "burn-6.jpg": {
+      "category": "burn",
+      "description": "Old burnt paper HD texture JPG - full page with fire-damaged edges (treasure map / Indiana Jones look)",
+      "dimensions": "4200x3300",
+      "format": "JPEG",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 1326386,
+      "source_page": "https://www.onlygfx.com/5-old-burnt-paper-hd-textures-jpg/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2016/07/burnt-1.jpg",
+      "transparent": false
+    },
+    "wrinkle-1.png": {
+      "category": "wrinkle",
+      "description": "Wrinkled paper banner/label PNG transparent (#1 of set of 5)",
+      "dimensions": "1930x472",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use (no attribution required but credit appreciated)",
+      "size_bytes": 1843800,
+      "source_page": "https://www.onlygfx.com/5-wrinkled-paper-banner-label-png-transparent/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2018/10/5-wrinkled-paper-banner-label-1.png",
+      "transparent": true
+    },
+    "wrinkle-2.png": {
+      "category": "wrinkle",
+      "description": "Wrinkled paper banner/label PNG transparent (#2 of set of 5)",
+      "dimensions": "1750x494",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 1964775,
+      "source_page": "https://www.onlygfx.com/5-wrinkled-paper-banner-label-png-transparent/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2018/10/5-wrinkled-paper-banner-label-2.png",
+      "transparent": true
+    },
+    "wrinkle-3.png": {
+      "category": "wrinkle",
+      "description": "Wrinkled paper banner/label PNG transparent (#3 of set of 5)",
+      "dimensions": "872x327",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 619675,
+      "source_page": "https://www.onlygfx.com/5-wrinkled-paper-banner-label-png-transparent/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2018/10/5-wrinkled-paper-banner-label-3.png",
+      "transparent": true
+    },
+    "wrinkle-4.png": {
+      "category": "wrinkle",
+      "description": "Wrinkled paper banner/label PNG transparent (#4 of set of 5) - heavier wrinkles",
+      "dimensions": "1031x809",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 1751933,
+      "source_page": "https://www.onlygfx.com/5-wrinkled-paper-banner-label-png-transparent/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2018/10/5-wrinkled-paper-banner-label-4.png",
+      "transparent": true
+    },
+    "wrinkle-5.png": {
+      "category": "wrinkle",
+      "description": "Crumpled-up paper ball PNG transparent - deep creases/folds (#1 of set of 6)",
+      "dimensions": "970x1011",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 971415,
+      "source_page": "https://www.onlygfx.com/crumpled-up-ball-paper-png-transparent/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2020/02/crumpled-up-ball-paper-1.png",
+      "transparent": true
+    },
+    "wrinkle-6.png": {
+      "category": "wrinkle",
+      "description": "Crumpled-up paper ball PNG transparent - deep creases/folds (#3 of set of 6)",
+      "dimensions": "986x1010",
+      "format": "PNG RGBA",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 913915,
+      "source_page": "https://www.onlygfx.com/crumpled-up-ball-paper-png-transparent/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2020/02/crumpled-up-ball-paper-3.png",
+      "transparent": true
+    },
+    "wrinkle-7.jpg": {
+      "category": "wrinkle",
+      "description": "White creased paper hi-res full scan JPG - subtle fold/crease lines (use with mix-blend-mode:multiply)",
+      "dimensions": "4000x3000",
+      "format": "JPEG",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 1064945,
+      "source_page": "https://www.onlygfx.com/white-creased-paper-texture-jpg/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2021/09/white-creased-paper-texture-1.jpg",
+      "transparent": false
+    },
+    "wrinkle-8.jpg": {
+      "category": "wrinkle",
+      "description": "Crumpled and folded old paper hi-res JPG - aged paper with heavy creases (multiply layer)",
+      "dimensions": "4125x3201",
+      "format": "JPEG",
+      "license": "OnlyGFX free for personal and commercial use",
+      "size_bytes": 1396779,
+      "source_page": "https://www.onlygfx.com/5-crumpled-and-folded-old-paper-textures-jpg/",
+      "source_url": "https://www.onlygfx.com/wp-content/uploads/2016/07/crumpled-folded-old-paper-1.jpg",
+      "transparent": false
+    }
+  }
+}

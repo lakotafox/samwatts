@@ -1,0 +1,31 @@
+# macOS cruft
+.DS_Store
+**/.DS_Store
+
+# NetBeans leftovers (from older commits)
+/NetBeansProjects/hello_world/nbproject/private/
+/NetBeansProjects/MinCoins/nbproject/private/
+/NetBeansProjects/MinCoins/build/
+
+# TikTok + YouTube scrapes — files often exceed GitHub's 100MB limit.
+# Keep them local-only until we wire up a CDN (Cloudinary / similar).
+/assets/tt-scrape/
+/assets/yt-scrape/
+
+# Instaloader session + archive state (machine-local)
+/assets/ig-scrape/mini_watts_id
+/assets/ig-scrape/.instaloader-session
+/assets/*-scrape/archive.txt
+
+# Local dev-server logs
+/scripts/*.log
+
+# Editor backup (generated on each save)
+/index.html.bak
+/*.bak
+
+# Archived old tools
+/.archive/
+
+# Node
+node_modules/

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>samwatts · editor</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel-2:#1f232f; --border:#2a2f3e;
+    --ink:#eceef3; --ink-soft:#95a0b4; --accent:#e6a33a; --ok:#5bd46c; --warn:#ff6b4a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{font:14px/1.45 -apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:var(--bg);color:var(--ink);display:grid;grid-template-columns:1fr 440px;grid-template-rows:48px 1fr 40px}
+  @media (max-width:1100px){ body{grid-template-columns:1fr 360px} }
+  /* embedded mode: no brand, tighter top bar */
+  body.embedded .topbar .brand{display:none}
+  body.embedded{grid-template-rows:42px 1fr 36px}
+  body.embedded .topbar{padding:0 .75rem}
+  body.embedded .bottom{padding:0 .75rem;font-size:.72rem}
+  a{color:var(--accent);text-decoration:none}
+
+  /* top bar */
+  .topbar{grid-column:1/-1;background:#0a0c12;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;padding:0 1rem}
+  .topbar .brand{font-weight:700;letter-spacing:.02em}
+  .topbar .brand span{color:var(--ink-soft);font-weight:400;margin-left:.4rem}
+  .topbar .grow{flex:1}
+  .btn{background:var(--panel);color:var(--ink);border:1px solid var(--border);padding:.42rem .8rem;border-radius:5px;cursor:pointer;font:inherit;font-size:.82rem;transition:.15s;white-space:nowrap}
+  .btn:hover{background:var(--panel-2);border-color:#3b415a}
+  .btn.primary{background:var(--accent);color:#1a1306;border-color:var(--accent);font-weight:600}
+  .btn.primary:hover{background:#efb34a;border-color:#efb34a}
+  .btn.ghost{background:transparent}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ink-soft);margin-right:4px;vertical-align:baseline}
+  .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)}
+
+  /* left (iframe wrapper) */
+  .stage{position:relative;background:#000;overflow:hidden}
+  .stage iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+  .hint-banner{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(15,17,23,.9);border:1px solid var(--border);border-radius:30px;padding:.35rem .9rem;font-size:.78rem;color:var(--ink-soft);z-index:20;backdrop-filter:blur(6px)}
+  .hint-banner b{color:var(--accent)}
+
+  /* right drawer */
+  .drawer{background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+  .drawer-head{padding:.75rem .85rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:.5rem}
+  .drawer-head h2{font-size:.88rem;font-weight:700;letter-spacing:.02em}
+  .drawer-head .sub{font-size:.75rem;color:var(--ink-soft)}
+  .filters{display:flex;gap:.3rem;flex-wrap:wrap}
+  .chip{background:var(--panel-2);color:var(--ink);border:1px solid var(--border);padding:.3rem .6rem;border-radius:4px;cursor:pointer;font:inherit;font-size:.76rem}
+  .chip.active{background:var(--accent);color:#1a1306;border-color:var(--accent)}
+  .search{background:var(--panel-2);color:var(--ink);border:1px solid var(--border);padding:.38rem .6rem;border-radius:4px;font:inherit;font-size:.8rem;width:100%}
+  .search:focus{outline:none;border-color:var(--accent)}
+  .slot-pill{display:flex;align-items:center;gap:.55rem;background:#262a35;border:1px solid var(--border);border-radius:6px;padding:.45rem .55rem;font-size:.78rem;color:var(--ink)}
+  .slot-pill .thumb-mini{width:38px;height:38px;border-radius:4px;background:#000 center/cover no-repeat;flex-shrink:0;border:1px solid var(--border)}
+  .slot-pill .txt{line-height:1.25;min-width:0}
+  .slot-pill .txt b{display:block;color:var(--accent);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;margin-bottom:1px}
+  .slot-pill .txt span{color:var(--ink-soft);font-size:.72rem}
+  .slot-pill.none{display:block;font-style:italic;color:var(--ink-soft);text-align:center;padding:.55rem}
+
+  .library{flex:1;overflow-y:auto;padding:.85rem;display:grid;grid-template-columns:repeat(2,1fr);grid-auto-rows:max-content;gap:.85rem;align-content:start}
+  .lib-card{position:relative;background:#0c0e14;border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:.15s}
+  .lib-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.4)}
+  .lib-card .thumb{position:relative;aspect-ratio:1/1;background:#000;overflow:hidden}
+  .lib-card .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .lib-card .t{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.78);color:#fff;padding:2px 7px;border-radius:3px;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+  .lib-card .t.v{background:rgba(230,163,58,.95);color:#1a1306}
+  .lib-card .src{position:absolute;top:6px;right:6px;padding:2px 7px;border-radius:3px;font-size:.62rem;letter-spacing:.08em;font-weight:700;color:#fff;text-transform:uppercase}
+  .lib-card .src.ig{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)}
+  .lib-card .src.tt{background:#000;border:1px solid #ff0050}
+  .lib-card .src.yt{background:#ff0000}
+  .lib-card .meta{padding:.42rem .55rem .5rem;display:flex;flex-direction:column;gap:.18rem;min-height:3.1rem}
+  .lib-card .date{font:600 .7rem/1 monospace;color:var(--ink-soft);letter-spacing:.02em}
+  .lib-card .cap{font-size:.72rem;line-height:1.3;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .lib-empty{grid-column:1/-1;color:var(--ink-soft);text-align:center;padding:2rem .5rem;font-size:.8rem}
+
+  /* =========== publish overlay =========== */
+  .pub-overlay{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at center,#1a1d2a 0%,#07080c 80%);display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:2.5rem 1.5rem;overflow-y:auto}
+  .pub-overlay.on{display:flex}
+  .pub-title{font:700 1.6rem/1.1 -apple-system,sans-serif;color:#fff;margin-bottom:.35rem;letter-spacing:-.01em}
+  .pub-sub{font-size:.88rem;color:#8b93a8;margin-bottom:1.75rem}
+  .pub-fox{width:200px;height:200px;margin-bottom:.85rem;filter:drop-shadow(0 0 26px rgba(230,163,58,.4))}
+  .pub-fox video{width:100%;height:100%;object-fit:contain;display:block}
+  .pub-steps{background:#12151e;border:1px solid #232838;border-radius:10px;padding:1.1rem 1.3rem;min-width:330px;max-width:460px;width:100%;margin-bottom:1.75rem}
+  .pub-step{display:flex;align-items:center;gap:.7rem;padding:.5rem 0;color:#8b93a8;font-size:.93rem;transition:color .2s}
+  .pub-step .mark{width:20px;height:20px;border-radius:50%;border:2px solid #3b4155;display:grid;place-items:center;font-size:.7rem;flex-shrink:0;transition:.2s}
+  .pub-step.active{color:#fff}
+  .pub-step.active .mark{border-color:var(--accent);background:var(--accent);color:#1a1306}
+  .pub-step.active .mark::before{content:"✓"}
+  .pub-step.doing .mark{border-color:var(--accent);border-top-color:transparent;animation:spin 0.7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .pub-step.doing{color:#fff}
+  .pub-step.err{color:#ff6b4a}
+  .pub-step.err .mark{border-color:#ff6b4a;background:#ff6b4a;color:#fff}
+  .pub-step.err .mark::before{content:"!"}
+
+  .game-wrap{background:#12151e;border:1px solid #232838;border-radius:10px;padding:.85rem;text-align:center;max-width:820px;width:100%;display:flex;flex-direction:column;gap:.6rem}
+  .game-wrap h4{font-size:.78rem;letter-spacing:.15em;color:#8b93a8;text-transform:uppercase;font-weight:600}
+  .game-wrap h4 a{color:var(--accent);text-decoration:none;margin-left:.5rem}
+  .game-wrap iframe{width:100%;height:520px;border:0;border-radius:6px;background:#000;display:none}
+  .game-wrap.playing iframe{display:block}
+  .game-wrap .cta{background:var(--accent);color:#1a1306;border:0;padding:.7rem 1.1rem;border-radius:6px;font:inherit;font-weight:700;cursor:pointer;align-self:center}
+  .game-wrap .cta:hover{background:#efb34a}
+  .game-wrap.playing .cta{display:none}
+  .pub-close{margin-top:1.4rem;display:none}
+  .pub-overlay.done .pub-close{display:inline-block}
+  .pub-overlay.done .pub-fox{animation:none;transform:none}
+
+  /* bottom bar */
+  .bottom{grid-column:1/-1;background:#0a0c12;border-top:1px solid var(--border);display:flex;align-items:center;gap:.6rem;padding:0 1rem;font-size:.78rem;color:var(--ink-soft)}
+  .bottom .grow{flex:1}
+  .bottom .msg{font-family:monospace}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">samwatts editor <span>local only</span></div>
+  <div class="grow"></div>
+  <button class="btn ghost" id="btnRefresh" title="pull latest posts from Instagram, TikTok, and YouTube">↻ refresh media</button>
+  <button class="btn" id="btnRevert" title="throw away unsaved edits">revert</button>
+  <button class="btn" id="btnSave" title="write changes to index.html on this laptop (preview only)">save draft</button>
+  <button class="btn primary" id="btnPublish" title="commit and push — triggers Netlify deploy">publish live ↑</button>
+</div>
+
+<div class="stage">
+  <div class="hint-banner">click any photo or video on the page to <b>replace it</b></div>
+  <iframe id="siteFrame" src="../index.html?edit=1"></iframe>
+</div>
+
+<aside class="drawer">
+  <div class="drawer-head">
+    <h2>media library</h2>
+    <div class="sub" id="libStats">loading…</div>
+    <div class="slot-pill none" id="slotPill">click a photo or video on the page to replace it</div>
+    <input class="search" id="search" type="text" placeholder="search captions…">
+    <div class="filters">
+      <button class="chip active" data-type="all">all</button>
+      <button class="chip" data-type="photo">photos</button>
+      <button class="chip" data-type="video">videos</button>
+    </div>
+    <div class="filters">
+      <button class="chip active" data-src="all">all sources</button>
+      <button class="chip" data-src="instagram">IG</button>
+      <button class="chip" data-src="tiktok">TT</button>
+      <button class="chip" data-src="youtube">YT</button>
+    </div>
+  </div>
+  <div class="library" id="library"></div>
+</aside>
+
+<div class="bottom">
+  <span><span class="dot" id="statusDot"></span><span id="statusText">ready</span></span>
+  <div class="grow"></div>
+  <span class="msg" id="editCount">0 edits</span>
+</div>
+
+<!-- =========== publish overlay =========== -->
+<div class="pub-overlay" id="pubOverlay">
+  <div class="pub-fox" id="pubFox">
+    <video autoplay loop muted playsinline>
+      <source src="../assets/fox/foxloading.webm" type="video/webm">
+      <img src="../assets/fox/loading-fox.png" alt="loading">
+    </video>
+  </div>
+  <div class="pub-title" id="pubTitle">publishing to thesamwatts.com…</div>
+  <div class="pub-sub" id="pubSub">this should take about 60 seconds</div>
+
+  <div class="pub-steps">
+    <div class="pub-step" id="step1"><span class="mark"></span><span>saving changes</span></div>
+    <div class="pub-step" id="step2"><span class="mark"></span><span>committing to github</span></div>
+    <div class="pub-step" id="step3"><span class="mark"></span><span>netlify rebuilding the site</span></div>
+    <div class="pub-step" id="step4"><span class="mark"></span><span>live on thesamwatts.com</span></div>
+  </div>
+
+  <div class="game-wrap" id="gameWrap">
+    <h4>🎮 wanna play a game while you wait? <a href="https://foxbuiltstore.com/games/" target="_blank">(full-screen ↗)</a></h4>
+    <button type="button" class="cta" id="btnPlayGame">play games</button>
+    <iframe id="gameFrame" title="games"></iframe>
+  </div>
+
+  <button class="btn primary pub-close" id="btnPubClose">done — close</button>
+</div>
+
+<script>
+/* ========= state ========= */
+let library = [];
+let filterType = 'all';
+let filterSrc  = 'all';
+let searchQ = '';
+let selectedEl = null;   // iframe element currently picked
+let selectedSlotId = ''; // stable slot identifier
+let edits = {};          // { slotId: { newSrc, newPoster, newType, caption } }
+const $ = s => document.querySelector(s);
+const frame = $('#siteFrame');
+
+/* ========= helpers ========= */
+function setStatus(kind, text){
+  const d = $('#statusDot'); d.className = 'dot';
+  if (kind === 'ok')   d.classList.add('ok');
+  if (kind === 'warn') d.classList.add('warn');
+  $('#statusText').textContent = text;
+}
+function bumpCount(){
+  $('#editCount').textContent = `${Object.keys(edits).length} edit${Object.keys(edits).length===1?'':'s'}`;
+}
+function slotIdFor(el){
+  // prefer explicit id, otherwise derive from class + nth-of-type
+  if (el.id) return '#' + el.id;
+  const parent = el.closest('[id]');
+  const path = [];
+  let cur = el;
+  while (cur && cur !== frame.contentDocument.body){
+    const idx = Array.from(cur.parentNode.children).indexOf(cur);
+    path.unshift(cur.tagName.toLowerCase() + (cur.className ? '.' + String(cur.className).trim().split(/\s+/).join('.') : '') + `:nth-child(${idx+1})`);
+    cur = cur.parentNode;
+  }
+  return (parent ? '#' + parent.id + ' ' : '') + path.slice(-4).join(' > ');
+}
+
+/* ========= library ========= */
+async function loadLibrary(){
+  try {
+    const r = await fetch('../media-browser/index.json?t=' + Date.now());
+    library = await r.json();
+    $('#libStats').textContent = `${library.length} posts · newest first`;
+    renderLibrary();
+  } catch (e) {
+    $('#libStats').textContent = 'library not found — run refresh first';
+  }
+}
+function renderLibrary(){
+  const q = searchQ.toLowerCase().trim();
+  const items = library.filter(it => {
+    if (filterType !== 'all' && it.type !== filterType) return false;
+    if (filterSrc  !== 'all' && (it.source || 'instagram') !== filterSrc) return false;
+    if (q && !(it.caption||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const lib = $('#library');
+  if (!items.length){ lib.innerHTML = '<div class="lib-empty">no matches</div>'; return; }
+  const frag = document.createDocumentFragment();
+  items.slice(0, 400).forEach(it => {
+    const c = document.createElement('div');
+    c.className = 'lib-card';
+    c.title = (it.caption || '(no caption)');
+    const cap = (it.caption || '').replace(/\s+/g, ' ').trim();
+    const src = (it.source || 'instagram');
+    const srcTag = src === 'instagram' ? 'ig' : (src === 'tiktok' ? 'tt' : 'yt');
+    c.innerHTML = `
+      <div class="thumb">
+        <img loading="lazy" src="..${it.thumb}">
+        <span class="t ${it.type==='video'?'v':''}">${it.type==='video'?'video':'photo'}</span>
+        <span class="src ${srcTag}">${srcTag}</span>
+      </div>
+      <div class="meta">
+        <div class="date">${(it.date||'').slice(5)}</div>
+        <div class="cap">${escapeHtml(cap.slice(0,110))}</div>
+      </div>`;
+    c.onclick = () => applyPick(it);
+    frag.appendChild(c);
+  });
+  lib.innerHTML = ''; lib.appendChild(frag);
+}
+
+/* ========= iframe edit mode ========= */
+function initFrame(){
+  const doc = frame.contentDocument;
+  if (!doc) return;
+
+  // inject editor styles into iframe
+  const style = doc.createElement('style');
+  style.textContent = `
+    .__ed-slot{outline:2px dashed rgba(230,163,58,.0);outline-offset:3px;cursor:pointer !important;transition:outline-color .12s}
+    .__ed-slot:hover{outline-color:rgba(230,163,58,.95)}
+    .__ed-slot.__ed-selected{outline:3px solid #e6a33a !important;outline-offset:4px;box-shadow:0 0 0 6px rgba(230,163,58,.18)}
+  `;
+  doc.head.appendChild(style);
+
+  // kill links so sam doesn't navigate away
+  doc.querySelectorAll('a[href]').forEach(a => {
+    if (a.getAttribute('href').startsWith('#')) return;
+    a.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); }, true);
+  });
+
+  // find every replaceable media slot
+  const slots = new Set();
+  doc.querySelectorAll('[data-fullsrc], [data-video]').forEach(el => slots.add(el));
+  doc.querySelectorAll('.hero-video video').forEach(el => slots.add(el));
+  doc.querySelectorAll('.about-photo img').forEach(el => slots.add(el));
+
+  slots.forEach(el => {
+    el.classList.add('__ed-slot');
+    el.addEventListener('click', e => {
+      e.preventDefault(); e.stopPropagation();
+      selectSlot(el);
+    }, true);
+  });
+
+  // pause autoplay videos so they don't distract / waste CPU during editing
+  doc.querySelectorAll('video').forEach(v => { try { v.pause(); v.removeAttribute('autoplay'); } catch(_){} });
+
+  setStatus('ok', `ready · ${slots.size} editable slots`);
+}
+
+function selectSlot(el){
+  const doc = frame.contentDocument;
+  doc.querySelectorAll('.__ed-selected').forEach(n => n.classList.remove('__ed-selected'));
+  el.classList.add('__ed-selected');
+  selectedEl = el;
+  selectedSlotId = slotIdFor(el);
+  const pill = $('#slotPill');
+  pill.classList.remove('none');
+  const label = friendlySlotLabel(el);
+  const thumbUrl = slotThumbUrl(el);
+  pill.innerHTML = `
+    <div class="thumb-mini" style="background-image:url('${thumbUrl}')"></div>
+    <div class="txt">
+      <b>replacing</b>
+      <span>${escapeHtml(label)}</span>
+    </div>`;
+  el.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function friendlySlotLabel(el){
+  const cap = el.getAttribute('data-caption');
+  if (cap) return cap.slice(0, 70);
+  if (el.closest('.hero-video')) return 'hero video';
+  if (el.closest('.about-photo')) return 'about photo';
+  const li = el.closest('li.polaroid');
+  if (li){
+    const capEl = li.querySelector('.polaroid-caption');
+    if (capEl) return 'polaroid — ' + capEl.textContent.trim();
+    return 'polaroid';
+  }
+  return el.tagName.toLowerCase();
+}
+
+function slotThumbUrl(el){
+  if (el.tagName === 'IMG') return el.src;
+  if (el.tagName === 'VIDEO') return el.poster || '';
+  const poster = el.getAttribute('data-poster');
+  if (poster) return '../' + poster.replace(/^\//,'');
+  const full = el.getAttribute('data-fullsrc');
+  if (full && !/\.(mp4|mov|webm)$/i.test(full)) return '../' + full.replace(/^\//,'');
+  const innerImg = el.querySelector && el.querySelector('img');
+  return innerImg ? innerImg.src : '';
+}
+
+function currentSrcOf(el){
+  if (el.tagName === 'VIDEO') return el.getAttribute('src') || '';
+  if (el.tagName === 'IMG')   return el.getAttribute('src') || '';
+  return el.getAttribute('data-fullsrc') || el.getAttribute('data-video') || '';
+}
+
+function applyPick(item){
+  if (!selectedEl){ setStatus('warn', 'pick a slot first'); return; }
+  const el = selectedEl;
+  const mediaRel = (item.videos && item.videos[0]) || (item.images && item.images[0]) || item.thumb;
+  // index.json paths begin with "/assets/..."; rewrite to relative for on-disk
+  const sitePath = mediaRel.replace(/^\//, '');
+  const isVideo = item.type === 'video';
+
+  // update DOM in the iframe so sam sees the change immediately
+  if (el.tagName === 'VIDEO'){
+    el.src = '../' + sitePath;
+    if (item.thumb) el.poster = '..' + item.thumb;
+    try { el.load(); el.pause(); } catch(_){}
+  } else if (el.tagName === 'IMG'){
+    el.src = '../' + sitePath;
+  } else {
+    // <li class="polaroid"> container: update data-* and its inner <img>
+    if (isVideo){
+      el.setAttribute('data-video',   sitePath);
+      el.setAttribute('data-fullsrc', sitePath);
+      el.setAttribute('data-type',    'video');
+      if (item.thumb) el.setAttribute('data-poster', item.thumb.replace(/^\//,''));
+      const innerImg = el.querySelector('img');
+      if (innerImg && item.thumb) innerImg.src = '..' + item.thumb;
+    } else {
+      el.removeAttribute('data-video');
+      el.removeAttribute('data-poster');
+      el.setAttribute('data-fullsrc', sitePath);
+      el.setAttribute('data-type',    'photo');
+      const innerImg = el.querySelector('img');
+      if (innerImg) innerImg.src = '../' + sitePath;
+    }
+    if (item.caption) el.setAttribute('data-caption', item.caption.slice(0, 200));
+    // auto-update the visible polaroid caption (first phrase, lowercase, ~40 chars)
+    const capEl = el.querySelector && el.querySelector('.polaroid-caption');
+    if (capEl && item.caption){
+      const shortCap = item.caption.split(/[.\n#]/)[0].trim().toLowerCase().slice(0, 40);
+      if (shortCap) capEl.textContent = shortCap;
+    }
+  }
+
+  edits[selectedSlotId] = { id: item.id, type: item.type, src: sitePath, thumb: item.thumb, caption: item.caption || '' };
+  bumpCount();
+  setStatus('ok', `swapped — click another slot to keep editing, or hit save`);
+  // refresh the pill preview to show the new thumbnail
+  selectSlot(el);
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ========= save ========= */
+async function save(opts = {}){
+  if (!Object.keys(edits).length){
+    if (!opts.silent) setStatus('warn', 'no edits to save');
+    return;
+  }
+  setStatus('ok', 'saving…');
+  // Grab the iframe's live DOM, serialize, POST to /api/save
+  const doc = frame.contentDocument;
+  // strip our editor-only artifacts before writing
+  doc.querySelectorAll('.__ed-slot').forEach(el => el.classList.remove('__ed-slot', '__ed-selected'));
+  doc.querySelectorAll('style').forEach(s => { if (s.textContent.includes('__ed-slot')) s.remove(); });
+  // restore autoplay we stripped so the saved file plays for real visitors
+  doc.querySelectorAll('.hero-video video').forEach(v => v.setAttribute('autoplay',''));
+
+  const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+  try {
+    const r = await fetch('/api/save', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ path:'index.html', content: html })
+    });
+    const j = await r.json();
+    if (!r.ok || j.error) throw new Error(j.error || r.statusText);
+    edits = {}; bumpCount();
+    if (!opts.silent){
+      setStatus('ok', `saved ✓  (backup at index.html.bak)`);
+      // reload iframe to prove the save stuck
+      frame.src = '../index.html?edit=1&t=' + Date.now();
+    }
+  } catch (e) {
+    setStatus('warn', 'save failed: ' + e.message);
+    if (opts.silent) throw e;
+  }
+}
+
+/* ========= refresh ========= */
+async function refreshScrape(){
+  if (!confirm('Pull the latest posts from Instagram, TikTok, and YouTube? (takes a few minutes on a cold start, seconds on updates)')) return;
+  setStatus('ok', 'refreshing — see bottom status');
+  try {
+    const r = await fetch('/api/refresh', { method:'POST' });
+    const j = await r.json();
+    if (!r.ok || j.error) throw new Error(j.error || r.statusText);
+  } catch (e) {
+    setStatus('warn', 'refresh failed: ' + e.message); return;
+  }
+  // poll the refresh log for completion
+  const start = Date.now();
+  const poll = async () => {
+    try {
+      const r = await fetch('/api/refresh-status');
+      const j = await r.json();
+      const tail = j.tail || '';
+      const lastLine = tail.trim().split('\n').pop() || '';
+      setStatus('ok', 'refreshing · ' + lastLine.slice(0, 80));
+      if (/refresh done/i.test(tail)){
+        setStatus('ok', 'refresh complete — reloading library');
+        await loadLibrary();
+        return;
+      }
+      if (Date.now() - start > 180000){
+        setStatus('warn', 'refresh taking >3min — check scripts/refresh.log');
+        return;
+      }
+    } catch(_){}
+    setTimeout(poll, 2000);
+  };
+  setTimeout(poll, 1500);
+}
+
+/* ========= wiring ========= */
+function wire(){
+  frame.addEventListener('load', initFrame);
+  document.querySelectorAll('.chip[data-type]').forEach(b => {
+    b.onclick = () => {
+      filterType = b.dataset.type;
+      document.querySelectorAll('.chip[data-type]').forEach(x => x.classList.toggle('active', x.dataset.type === filterType));
+      renderLibrary();
+    };
+  });
+  document.querySelectorAll('.chip[data-src]').forEach(b => {
+    b.onclick = () => {
+      filterSrc = b.dataset.src;
+      document.querySelectorAll('.chip[data-src]').forEach(x => x.classList.toggle('active', x.dataset.src === filterSrc));
+      renderLibrary();
+    };
+  });
+  $('#search').addEventListener('input', e => { searchQ = e.target.value; renderLibrary(); });
+  $('#btnSave').onclick = () => save();
+  $('#btnPublish').onclick = publish;
+  $('#btnPubClose').onclick = () => {
+    $('#pubOverlay').classList.remove('on','done');
+    closeGames();
+  };
+  $('#btnPlayGame').onclick = openGames;
+  $('#btnRefresh').onclick = refreshScrape;
+  $('#btnRevert').onclick = () => {
+    if (!Object.keys(edits).length) return;
+    if (!confirm('Throw away unsaved edits?')) return;
+    edits = {}; bumpCount();
+    frame.src = '../index.html?edit=1&t=' + Date.now();
+    setStatus('ok', 'reverted');
+  };
+}
+
+/* ========= publish flow ========= */
+async function publish(){
+  if (Object.keys(edits).length){
+    // have unsaved edits — save them first (silent)
+    try { await save({silent:true}); } catch(_){ setStatus('warn', 'save failed, aborting publish'); return; }
+  }
+  const ov = $('#pubOverlay');
+  ov.classList.remove('done'); ov.classList.add('on');
+  // reset steps
+  ['step1','step2','step3','step4'].forEach(id => { const s = $('#'+id); s.classList.remove('active','doing','err'); });
+  $('#pubTitle').textContent = 'publishing to thesamwatts.com…';
+  $('#pubSub').textContent = 'this should take about 60 seconds';
+  closeGames();
+
+  // step 1 is implicitly done (save happened above)
+  markStep('step1', 'active');
+  markStep('step2', 'doing');
+
+  let result;
+  try {
+    const isLocal = /^(127\.0\.0\.1|localhost)/.test(location.host);
+    if (isLocal) {
+      // local dev server: git add && commit && push
+      const r = await fetch('/api/publish', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message:'editor: publish from admin' }) });
+      result = await r.json();
+      if (!r.ok || result.error) throw new Error(result.error || r.statusText);
+    } else {
+      // live on Netlify: POST the edited index.html to the serverless function
+      const html = await (await fetch('/index.html?t=' + Date.now(), { cache:'no-store' })).text();
+      const adminPw = sessionStorage.getItem('sw-admin-pw') || prompt('Admin password:') || '';
+      sessionStorage.setItem('sw-admin-pw', adminPw);
+      const r = await fetch('/.netlify/functions/publish', {
+        method:'POST',
+        headers:{'Content-Type':'application/json', 'X-Admin-Password': adminPw},
+        body: JSON.stringify({
+          message: 'editor: publish from admin',
+          files: [{ path: 'index.html', content: html }],
+        }),
+      });
+      result = await r.json();
+      if (!r.ok || result.error) throw new Error(result.error || r.statusText);
+    }
+  } catch (e) {
+    markStep('step2', 'err');
+    $('#pubTitle').textContent = 'publish failed';
+    $('#pubSub').textContent = e.message;
+    ov.classList.add('done');
+    return;
+  }
+  markStep('step2', 'active');
+  markStep('step3', 'doing');
+
+  // wait ~60s for Netlify build (we don't have the webhook yet so simulate a countdown)
+  let remaining = 60;
+  const tick = setInterval(() => {
+    remaining -= 1;
+    $('#pubSub').textContent = `netlify rebuilding… ~${Math.max(remaining,0)}s remaining`;
+    if (remaining <= 0){
+      clearInterval(tick);
+      markStep('step3', 'active');
+      markStep('step4', 'doing');
+      // poll the live URL
+      pollLive();
+    }
+  }, 1000);
+}
+
+async function pollLive(){
+  // try to hit thesamwatts.com to confirm it's responding
+  let tries = 0;
+  const check = async () => {
+    tries++;
+    try {
+      // no-cors fetch — we only care that it resolves without network error
+      await fetch('https://thesamwatts.com/?t=' + Date.now(), { mode:'no-cors', cache:'no-store' });
+      markStep('step4', 'active');
+      $('#pubTitle').textContent = 'live on thesamwatts.com ✓';
+      $('#pubSub').textContent = 'your changes are up';
+      $('#pubOverlay').classList.add('done');
+      return;
+    } catch(_){}
+    if (tries < 15) setTimeout(check, 2000);
+    else {
+      markStep('step4', 'active'); // best-effort
+      $('#pubTitle').textContent = 'probably live ✓';
+      $('#pubSub').textContent = "couldn't confirm automatically — try opening the site";
+      $('#pubOverlay').classList.add('done');
+    }
+  };
+  check();
+}
+
+function markStep(id, state){
+  const s = $('#'+id);
+  s.classList.remove('doing','active','err');
+  if (state) s.classList.add(state);
+}
+
+/* ========= foxbuilt games (reused via iframe) ========= */
+function openGames(){
+  const wrap = $('#gameWrap');
+  const f = $('#gameFrame');
+  if (!f.src) f.src = 'https://foxbuiltstore.com/games/';
+  wrap.classList.add('playing');
+}
+function closeGames(){
+  const wrap = $('#gameWrap');
+  const f = $('#gameFrame');
+  wrap.classList.remove('playing');
+  f.src = ''; // pauses whatever's playing
+}
+
+/* ========= boot ========= */
+if (new URLSearchParams(location.search).get('embedded') === '1') {
+  document.body.classList.add('embedded');
+}
+wire();
+loadLibrary();
+bumpCount();
+</script>
+</body>
+</html>

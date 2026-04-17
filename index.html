@@ -3,284 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Guy Next Door - Fitness & Lifestyle</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <title>Sam Watts — You in?</title>
+    <meta name="description" content="Sam. His m8s. A crew of guys showing up, lifting, praying, showing up again. You in?">
+    <meta name="theme-color" content="#f4e8d0">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Fraunces:opsz,wght@9..144,400..700&family=Special+Elite&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <header class="main-header">
-        <nav class="navbar">
-            <div class="nav-container">
-                <div class="logo">
-                    <h1 class="typewriter-text">
-                        <span class="typed-text"></span>
-                        <span class="cursor">&nbsp;</span>
-                    </h1>
-                </div>
-                <button class="mobile-menu-toggle" id="mobileMenuToggle">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+
+<!-- ============ NAV ============ -->
+<header class="nav-wrap">
+    <nav class="nav">
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#about">About</a></li>
+            <li><a href="#news">News</a></li>
+            <li><a href="#resources">Resources</a></li>
+            <li><a href="#socials">Socials</a></li>
+            <li><a href="#" id="loginOpen" class="nav-login">Log in</a></li>
+        </ul>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+        <a href="#join" class="nav-cta">You in?</a>
+    </nav>
+</header>
+
+<!-- ============ HERO ============ -->
+<section id="top" class="hero">    <div class="stain s1" aria-hidden="true"></div>
+    <div class="stain s2" aria-hidden="true"></div>
+    <div class="hero-grid">
+        <div class="hero-copy">
+            <p class="eyebrow">— take the pledge. join the m8s.</p>
+            <h1 class="hero-title">
+                You know <span class="accent">that guy.</span>
+            </h1>
+            <p class="hero-sub">
+                The one who just shows up. Lifts. Prays. Shows up again.
+            </p>
+            <p class="hero-pitch">
+                Every Monday we take the pledge. Hand on heart. A word to the m8s.
+                A promise to push. Pushups, bible on the table, bike keys on the
+                counter — get out, get after it, come back and tell us how it went.
+                <span class="pitch-strong">Free. Just don't be weird.</span>
+            </p>
+            <div class="hero-cta-row">
+                <a href="#join" class="btn btn-primary btn-xl">You in? →</a>
+            </div>
+        </div>
+
+        <div class="hero-video">
+            <div class="video-frame">
+                <video
+                    src="assets/ig-scrape/videos/2026-04-16_13-51-06_DXMd0dtFTmm.mp4"
+                    poster="assets/ig-scrape/posters/2026-04-16_13-51-06_DXMd0dtFTmm.webp"
+                    autoplay muted loop playsinline preload="metadata"
+                    controls></video>
+                <button type="button" class="unmute" id="unmuteBtn" aria-label="Tap to unmute">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path fill="currentColor" d="M3 10v4h4l5 4V6l-5 4H3zm12.5 2a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 15.5 12zM13 4.23v2.06A6 6 0 0 1 17 12a6 6 0 0 1-4 5.71v2.06A8 8 0 0 0 21 12 8 8 0 0 0 13 4.23z"/>
+                    </svg>
+                    <span>tap for sound</span>
                 </button>
-                <ul class="nav-menu" id="navMenu">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#workouts">Workouts</a></li>
-                    <li><a href="#nutrition">Nutrition</a></li>
-                    <li><a href="#motivation">Motivation</a></li>
-                    <li><a href="#gallery">Gallery</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="https://www.instagram.com/mini_watts/" target="_blank" class="social-link">
-                        <i class="fab fa-instagram"></i>
-                    </a></li>
-                    <li><a href="https://youtube.com/@samuelwatts5995" target="_blank" class="social-link">
-                        <i class="fab fa-youtube"></i>
-                    </a></li>
-                    <li><a href="https://www.tiktok.com/@.theguynextdoor" target="_blank" class="social-link">
-                        <i class="fab fa-tiktok"></i>
-                    </a></li>
+            </div>
+            <p class="video-caption">"The pledge is a state of mind. Takes 60 seconds."</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============ KEEPSAKES (polaroid scatter / mobile rail) ============ -->
+<section id="keepsakes" class="keepsakes">    <div class="stain s3" aria-hidden="true"></div>
+    <div class="keepsakes-header container">
+        <p class="section-eyebrow">— the logbook</p>
+        <h2 class="section-title">what's in my orbit.</h2>
+        <p class="section-intro" style="margin: 0 auto; text-align: center;">
+            Pick one up. Tap anywhere on it.
+        </p>
+        <svg class="travel-line" viewBox="0 0 800 24" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M 10 12 Q 150 4, 300 12 T 550 14 T 790 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+    </div>
+
+    <ul class="polaroid-scatter" role="list" id="polaroidList">
+
+        <li class="polaroid p1"
+            data-video="assets/ig-scrape/videos/2026-04-16_13-51-06_DXMd0dtFTmm.mp4"
+            data-poster="assets/ig-scrape/posters/2026-04-16_13-51-06_DXMd0dtFTmm.webp"
+            data-fullsrc="assets/ig-scrape/videos/2026-04-16_13-51-06_DXMd0dtFTmm.mp4"
+            data-caption="The pledge is a state of mind — takes 60 seconds."
+            data-date="apr 16 '26"
+            data-type="video"
+            tabindex="0">
+            <span class="polaroid-tape" style="--tape-r:-5deg"></span>
+            <div class="polaroid-frame">
+                <img class="polaroid-photo" src="assets/ig-scrape/posters/2026-04-16_13-51-06_DXMd0dtFTmm.webp" loading="lazy" alt="Sam taking the pledge">
+                <span class="polaroid-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            </div>
+            <p class="polaroid-caption">the pledge</p>
+        </li>
+
+        <li class="polaroid p2"
+            data-fullsrc="assets/ig-scrape/photos/2026-04-11_22-21-07_DXAgivBFeNR_1.jpg"
+            data-caption="Tomorrow is not guaranteed — take advantage of today."
+            data-date="apr 11 '26"
+            data-type="photo"
+            tabindex="0">
+            <span class="polaroid-tape" style="--tape-r:3deg"></span>
+            <div class="polaroid-frame">
+                <img class="polaroid-photo" src="assets/ig-scrape/photos/2026-04-11_22-21-07_DXAgivBFeNR_1.jpg" loading="lazy" alt="Tomorrow is not guaranteed">
+            </div>
+            <p class="polaroid-caption">tomorrow ain't promised</p>
+        </li>
+
+        <li class="polaroid p3"
+            data-video="assets/ig-scrape/videos/2026-04-13_13-37-26_DXEt23sjTnZ.mp4"
+            data-poster="assets/ig-scrape/posters/2026-04-13_13-37-26_DXEt23sjTnZ.webp"
+            data-fullsrc="assets/ig-scrape/videos/2026-04-13_13-37-26_DXEt23sjTnZ.mp4"
+            data-caption="A bit late never hurt nobody."
+            data-date="apr 13 '26"
+            data-type="video"
+            tabindex="0">
+            <span class="polaroid-tape" style="--tape-r:-2deg"></span>
+            <div class="polaroid-frame">
+                <img class="polaroid-photo" src="assets/ig-scrape/posters/2026-04-13_13-37-26_DXEt23sjTnZ.webp" loading="lazy" alt="A bit late never hurt nobody">
+                <span class="polaroid-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            </div>
+            <p class="polaroid-caption">a bit late</p>
+        </li>
+
+        <li class="polaroid p4"
+            data-fullsrc="assets/ig-scrape/photos/2025-05-29_02-17-43_DKOG1WFs9tV.jpg"
+            data-caption="Happiness captured."
+            data-date="may 29 '25"
+            data-type="photo"
+            tabindex="0">
+            <span class="polaroid-tape" style="--tape-r:6deg"></span>
+            <div class="polaroid-frame">
+                <img class="polaroid-photo" src="assets/ig-scrape/photos/2025-05-29_02-17-43_DKOG1WFs9tV.jpg" loading="lazy" alt="Happiness captured">
+            </div>
+            <p class="polaroid-caption">happiness captured</p>
+        </li>
+
+        <li class="polaroid p5"
+            data-fullsrc="assets/ig-scrape/photos/2025-05-04_18-00-39_DJPa3rgxTqT.jpg"
+            data-caption="Oh to be a dawg — music is a blessing."
+            data-date="may 4 '25"
+            data-type="photo"
+            tabindex="0">
+            <span class="polaroid-tape" style="--tape-r:-4deg"></span>
+            <div class="polaroid-frame">
+                <img class="polaroid-photo" src="assets/ig-scrape/photos/2025-05-04_18-00-39_DJPa3rgxTqT.jpg" loading="lazy" alt="Music is a blessing">
+            </div>
+            <p class="polaroid-caption">music is a blessing</p>
+        </li>
+
+        <li class="polaroid p6"
+            data-fullsrc="assets/ig-scrape/photos/2026-03-02_14-47-26_DVYsplMjdRo.jpg"
+            data-caption="Big sister's birthday."
+            data-date="mar 2 '26"
+            data-type="photo"
+            tabindex="0">
+            <span class="polaroid-tape" style="--tape-r:2deg"></span>
+            <div class="polaroid-frame">
+                <img class="polaroid-photo" src="assets/ig-scrape/photos/2026-03-02_14-47-26_DVYsplMjdRo.jpg" loading="lazy" alt="Sister">
+            </div>
+            <p class="polaroid-caption">big sis</p>
+        </li>
+
+        <li class="polaroid p7"
+            data-fullsrc="assets/ig-scrape/photos/2025-12-21_19-12-49_DSiWwbrFWsr.jpg"
+            data-caption="Go to church, or suffer from low test."
+            data-date="dec 21 '25"
+            data-type="photo"
+            tabindex="0">
+            <span class="polaroid-tape" style="--tape-r:-6deg"></span>
+            <div class="polaroid-frame">
+                <img class="polaroid-photo" src="assets/ig-scrape/photos/2025-12-21_19-12-49_DSiWwbrFWsr.jpg" loading="lazy" alt="Church">
+            </div>
+            <p class="polaroid-caption">church</p>
+        </li>
+
+        <li class="polaroid p8"
+            data-video="assets/ig-scrape/videos/2026-04-16_00-05-05_DXK_ikrjYHN.mp4"
+            data-poster="assets/ig-scrape/posters/2026-04-16_00-05-05_DXK_ikrjYHN.webp"
+            data-fullsrc="assets/ig-scrape/videos/2026-04-16_00-05-05_DXK_ikrjYHN.mp4"
+            data-caption="It's the little things that matter the most."
+            data-date="apr 16 '26"
+            data-type="video"
+            tabindex="0">
+            <span class="polaroid-tape" style="--tape-r:5deg"></span>
+            <div class="polaroid-frame">
+                <img class="polaroid-photo" src="assets/ig-scrape/posters/2026-04-16_00-05-05_DXK_ikrjYHN.webp" loading="lazy" alt="The little things">
+                <span class="polaroid-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            </div>
+            <p class="polaroid-caption">the little things</p>
+        </li>
+
+    </ul>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section id="about" class="about">
+    <div class="container about-grid">
+        <div class="about-photo">
+            <div class="polaroid-lg" style="--r:-2deg">
+                <img src="assets/images/Sitphoto.png" alt="Sam">
+                <p class="polaroid-caption">— sam, somewhere</p>
+            </div>
+        </div>
+        <div class="about-copy">
+            <p class="section-eyebrow">why I started this</p>
+            <h2 class="section-title">Why an online crew?</h2>
+            <p>
+                Because I needed one. I needed guys who'd show up for me when
+                I said something mattered — and I needed to be the guy who
+                showed up for theirs. I needed accountability that didn't feel
+                like a lecture, and friends who didn't feel like colleagues.
+            </p>
+            <p>
+                This isn't a program. No guru, no checkout cart. It's a room
+                full of dudes who do what they said they'd do — who text back,
+                who call out slipping, who shake your hand when you do the
+                work. You're supported. You support. It trades.
+            </p>
+            <p>
+                That's what I needed. It's what you can be for somebody else.
+                <strong>So join the crew.</strong>
+            </p>
+            <p class="quote">
+                "Once you can enjoy the journey, you've already reached success."
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ============ NEWS ============ -->
+<section id="news" class="news">    <div class="stain s4" aria-hidden="true"></div>
+    <div class="container">
+        <p class="section-eyebrow">From the dock</p>
+        <h2 class="section-title">News &amp; announcements.</h2>
+
+        <div class="news-grid">
+            <article class="news-card burnt-card">
+                <p class="news-date">Apr 16, 2026</p>
+                <h3 class="news-headline">New site is up.</h3>
+                <p class="news-body">
+                    Threw out the sales pitch. This is just the front door now.
+                    Come through, hang with the m8s, take the pledge.
+                </p>
+            </article>
+
+            <article class="news-card burnt-card">
+                <p class="news-date">Coming soon</p>
+                <h3 class="news-headline">Monday pledge video.</h3>
+                <p class="news-body">
+                    Every Monday at 7am — hand on heart, then 100 pushups.
+                    Drop in on IG live or catch the replay.
+                </p>
+            </article>
+
+            <article class="news-card burnt-card">
+                <p class="news-date">Coming soon</p>
+                <h3 class="news-headline">Crew meetup.</h3>
+                <p class="news-body">
+                    Lift. Cookout. Bonfire. Bring a friend, bring a bible,
+                    bring a bag of candy. Details dropping in the chat.
+                </p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- ============ RESOURCES ============ -->
+<section id="resources" class="resources">    <div class="stain s5" aria-hidden="true"></div>
+    <div class="container">
+        <p class="section-eyebrow">— why join</p>
+        <h2 class="section-title">What you get.</h2>
+        <p class="section-intro">
+            Not a feature list. Just the stuff the crew actually does that
+            keeps us showing up.
+        </p>
+
+        <div class="res-grid">
+
+            <div class="res-card burnt-card">
+                <p class="res-kicker">01</p>
+                <h3 class="res-title">Real-life meetups</h3>
+                <ul class="res-list">
+                    <li>Bonfires under the stars</li>
+                    <li>Motorbike rides, long and short</li>
+                    <li>Camp weekends in the woods</li>
+                    <li>Cookouts — always a cookout</li>
                 </ul>
             </div>
-        </nav>
-    </header>
 
-    <section id="home" class="hero-section">
-        <div class="hero-content">
-            <h2 class="hero-title">
-                Transform Your <span class="rotating-text">
-                    <span class="rotating-word">Habits</span>
-                    <span class="rotating-word">Life</span>
-                    <span class="rotating-word">Day</span>
-                </span>
-            </h2>
-            <p class="hero-subtitle">One Rep at a Time</p>
-        </div>
-        <div class="hero-image">
-            <img src="assets/images/Sitphoto.png" alt="Sam Watts Fitness" style="width: 100%; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-        </div>
-        <div class="hero-quote">
-            "Once you can enjoy the journey, you've already reached success."
-        </div>
-    </section>
-
-    <section id="features" class="features-section">
-        <div class="container">
-            <div class="magic-bento-grid">
-                <div class="magic-card" data-glow-color="52, 152, 219">
-                    <div class="card__header">
-                        <span class="card__label">Fitness</span>
-                        <i class="fas fa-dumbbell"></i>
-                    </div>
-                    <div class="card__content">
-                        <h3 class="card__title">Custom Workouts</h3>
-                        <p class="card__description">Tailored fitness programs designed for real people with real schedules</p>
-                    </div>
-                </div>
-                <div class="magic-card" data-glow-color="46, 204, 113">
-                    <div class="card__header">
-                        <span class="card__label">Nutrition</span>
-                        <i class="fas fa-utensils"></i>
-                    </div>
-                    <div class="card__content">
-                        <h3 class="card__title">Practical Nutrition</h3>
-                        <p class="card__description">Simple, sustainable eating habits that fit your lifestyle</p>
-                    </div>
-                </div>
-                <div class="magic-card" data-glow-color="155, 89, 182">
-                    <div class="card__header">
-                        <span class="card__label">Mindset</span>
-                        <i class="fas fa-brain"></i>
-                    </div>
-                    <div class="card__content">
-                        <h3 class="card__title">Mindset Coaching</h3>
-                        <p class="card__description">Build mental strength alongside physical fitness</p>
-                    </div>
-                </div>
-                <div class="magic-card" data-glow-color="231, 76, 60">
-                    <div class="card__header">
-                        <span class="card__label">Community</span>
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="card__content">
-                        <h3 class="card__title">Community Support</h3>
-                        <p class="card__description">Join a supportive community of like-minded individuals</p>
-                    </div>
-                </div>
+            <div class="res-card burnt-card">
+                <p class="res-kicker">02</p>
+                <h3 class="res-title">A place to talk</h3>
+                <ul class="res-list">
+                    <li>Daily check-ins with the m8s</li>
+                    <li>Ask anything — no scripts, no judgment</li>
+                    <li>Vent when it's hard. Celebrate when it's not.</li>
+                    <li>Hold yourself (and the crew) accountable</li>
+                </ul>
             </div>
-        </div>
-    </section>
 
-    <section id="workouts" class="workouts-section">
-        <div class="container">
-            <h2 class="section-title">Workout Programs</h2>
-            <div class="workout-categories">
-                <div class="workout-card">
-                    <div class="workout-image">
-                        <img src="assets/images/Sitphoto2.jpg" alt="Beginner Workouts">
-                    </div>
-                    <h3>Beginner Friendly</h3>
-                    <p>Start your fitness journey with confidence</p>
-                </div>
-                <div class="workout-card">
-                    <div class="workout-image">
-                        <img src="assets/images/Sitphoto3.jpg" alt="Intermediate Workouts">
-                    </div>
-                    <h3>Level Up</h3>
-                    <p>Take your training to the next level</p>
-                </div>
-                <div class="workout-card">
-                    <div class="workout-image">
-                        <img src="assets/images/Sitphoto5.jpg" alt="Advanced Workouts">
-                    </div>
-                    <h3>Challenge Yourself</h3>
-                    <p>Push your limits with advanced routines</p>
-                </div>
+            <div class="res-card burnt-card">
+                <p class="res-kicker">03</p>
+                <h3 class="res-title">Stories &amp; gear swap</h3>
+                <ul class="res-list">
+                    <li>Stories that changed somebody's week</li>
+                    <li>Gear that held up. Gear that didn't.</li>
+                    <li>Prayers that helped</li>
+                    <li>What worked. What flopped. Both welcome.</li>
+                </ul>
             </div>
-            <div style="text-align: center; margin-top: 2rem;">
-                <a href="#contact" class="btn btn-primary">Start Now</a>
-            </div>
-        </div>
-    </section>
 
-    <section id="nutrition" class="nutrition-section">
-        <div class="container">
-            <h2 class="section-title">Fuel Your Body Right</h2>
-            <div class="nutrition-content">
-                <div class="nutrition-text">
-                    <h3>Simple. Sustainable. Effective.</h3>
-                    <p>Forget complicated diets and restrictive meal plans. Learn how to fuel your body with real food that you actually enjoy eating.</p>
-                    <ul class="nutrition-list">
-                        <li><i class="fas fa-check"></i> Meal prep made easy</li>
-                        <li><i class="fas fa-check"></i> Flexible dieting principles</li>
-                        <li><i class="fas fa-check"></i> Budget-friendly recipes</li>
-                        <li><i class="fas fa-check"></i> Supplement guidance</li>
-                    </ul>
-                    <a href="pages/nutrition.html" class="btn btn-primary">View Nutrition Guide</a>
-                </div>
-                <div class="nutrition-image">
-                    <img src="assets/images/SitphotoAG.JPG" alt="Healthy Lifestyle" style="width: 100%; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-                </div>
-            </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <section id="motivation" class="motivation-section">
-        <div class="container">
-            <h2 class="section-title">Daily Motivation</h2>
-            <div class="motivation-grid">
-                <div class="motivation-card">
-                    <blockquote>
-                        "Every expert was once a beginner. Every pro was once an amateur. Every icon was once an iconoclast. Start today."
-                    </blockquote>
+<!-- ============ SOCIALS ============ -->
+<section id="socials" class="socials">    <div class="stain s6" aria-hidden="true"></div>
+    <div class="container">
+        <p class="section-eyebrow">Follow my voyage</p>
+        <h2 class="section-title">Where I post.</h2>
+
+        <div class="socials-grid">
+            <a href="https://www.instagram.com/mini_watts/" target="_blank" rel="noopener" class="social-card burnt-card ig">
+                <i class="fab fa-instagram"></i>
+                <div>
+                    <p class="social-handle">@mini_watts</p>
+                    <p class="social-note">Main feed. Pledge reels, lifts, chaos.</p>
                 </div>
-                <div class="motivation-card">
-                    <blockquote>
-                        "The only bad workout is the one that didn't happen. Show up, do the work, see the results."
-                    </blockquote>
+                <span class="social-arrow">→</span>
+            </a>
+            <a href="https://youtube.com/@samuelwatts5995" target="_blank" rel="noopener" class="social-card burnt-card yt">
+                <i class="fab fa-youtube"></i>
+                <div>
+                    <p class="social-handle">@samuelwatts5995</p>
+                    <p class="social-note">Longer stuff. Workouts, rambles.</p>
                 </div>
-                <div class="motivation-card">
-                    <blockquote>
-                        "Your body can stand almost anything. It's your mind that you have to convince."
-                    </blockquote>
+                <span class="social-arrow">→</span>
+            </a>
+            <a href="https://www.tiktok.com/@.theguynextdoor" target="_blank" rel="noopener" class="social-card burnt-card tt">
+                <i class="fab fa-tiktok"></i>
+                <div>
+                    <p class="social-handle">@.theguynextdoor</p>
+                    <p class="social-note">Clips, bits, the dumb ones.</p>
                 </div>
-            </div>
-            <a href="pages/motivation.html" class="btn btn-secondary">More Inspiration</a>
+                <span class="social-arrow">→</span>
+            </a>
         </div>
-    </section>
+    </div>
+</section>
 
-    <section id="gallery" class="gallery-section">
-        <div class="container">
-            <h2 class="section-title">Gallery</h2>
-            <div class="gallery-grid">
-                <div class="gallery-item">
-                    <img src="assets/images/Sitphoto2.jpg" alt="Sam Watts" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <div class="gallery-item">
-                    <img src="assets/images/Sitphoto3.jpg" alt="Sam Watts" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <div class="gallery-item">
-                    <img src="assets/images/Sitphoto5.jpg" alt="Sam Watts" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <div class="gallery-item">
-                    <img src="assets/images/Sitphoto6.jpg" alt="Sam Watts" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <div class="gallery-item">
-                    <img src="assets/images/SitphotoAG.JPG" alt="Sam Watts" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <div class="gallery-item">
-                    <img src="assets/images/Sitphoto4 .jpg" alt="Sam Watts" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-            </div>
-            <a href="pages/gallery.html" class="btn btn-primary">View Full Gallery</a>
+<!-- ============ THE OATH ============ -->
+<section id="join" class="oath">
+    <div class="container oath-inner">
+        <p class="section-eyebrow light">— raise your right hand</p>
+        <h2 class="oath-title">Take the Oath.</h2>
+
+        <div class="oath-scroll" aria-hidden="true">
+            <p><em>To the crew. To myself. To the m8s I haven't met yet.</em></p>
+            <p>
+                I pledge to show up. To lift what I can lift. To pray when I
+                can pray. To text back when a brother reaches out.
+            </p>
+            <p>
+                I pledge to speak up when I'm slipping. To back up a m8 when
+                they're slipping. To celebrate the wins and to keep going
+                when there aren't any.
+            </p>
+            <p>
+                I pledge to be the guy I needed — one pushup, one prayer,
+                one conversation at a time.
+            </p>
         </div>
-    </section>
 
-    <section id="about" class="about-section">
-        <div class="container">
-            <h2 class="section-title">Meet Your Coach</h2>
-            <div class="about-content">
-                <div class="about-image">
-                    <img src="assets/images/Sitphoto.png" alt="Sam Watts" style="width: 100%; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-                </div>
-                <div class="about-text">
-                    <h3>The Guy Next Door</h3>
-                    <p>Hey there! I'm just a regular guy who discovered that fitness isn't about being perfect - it's about being consistent. After years of trial and error, I've learned what actually works for real people with real lives.</p>
-                    <p>My mission is simple: make fitness accessible, enjoyable, and sustainable for everyone. No extreme diets, no impossible schedules, just practical advice that gets results.</p>
-                    <div class="about-stats">
-                        <div class="stat">
-                            <span class="stat-number">5+</span>
-                            <span class="stat-label">Years Experience</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">1000+</span>
-                            <span class="stat-label">Lives Changed</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">100%</span>
-                            <span class="stat-label">Dedication</span>
-                        </div>
-                    </div>
-                    <a href="pages/about.html" class="btn btn-primary">Full Story</a>
-                </div>
-            </div>
+        <!-- Step 1: swear — opens the sign-up modal on click -->
+        <div class="oath-step" data-step="1" data-active>
+            <label class="oath-check">
+                <input type="checkbox" id="oathSwear">
+                <span class="oath-check-box"></span>
+                <span class="oath-check-label">I swear.</span>
+            </label>
+            <button type="button" class="btn btn-primary btn-xl" id="oathNextBtn" disabled>
+                I'm in →
+            </button>
         </div>
-    </section>
 
-    <section class="cta-section">
-        <div class="container">
-            <h2>Ready to Start Your Journey?</h2>
-            <p>Join thousands who've transformed their lives with practical, sustainable fitness</p>
-            <div class="cta-buttons">
-                <a href="https://youtube.com/@samuelwatts5995" target="_blank" class="btn btn-primary">
-                    <i class="fab fa-youtube"></i> Watch on YouTube
-                </a>
-                <a href="https://www.instagram.com/mini_watts/" target="_blank" class="btn btn-secondary">
-                    <i class="fab fa-instagram"></i> Follow on Instagram
-                </a>
-            </div>
+        <!-- Step 3: welcome (shown after modal submits) -->
+        <div class="oath-step" data-step="3">
+            <div class="wax-seal" aria-hidden="true">M8s</div>
+            <p class="oath-welcome"><em>Welcome, <span id="oathWelcomeName">m8</span>.</em></p>
+            <p class="oath-sub">You're in. See you on the dashboard.</p>
+            <a href="dashboard.html" class="btn btn-primary btn-xl">
+                Enter the dashboard →
+            </a>
         </div>
-    </section>
+    </div>
+</section>
 
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-simple">
-                <h3>The Guy Next Door</h3>
-                <p>Your friendly neighborhood fitness coach</p>
-                <div class="social-links">
-                    <a href="https://www.instagram.com/mini_watts/" target="_blank">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="https://youtube.com/@samuelwatts5995" target="_blank">
-                        <i class="fab fa-youtube"></i>
-                    </a>
-                    <a href="https://www.tiktok.com/@.theguynextdoor" target="_blank">
-                        <i class="fab fa-tiktok"></i>
-                    </a>
-                </div>
+<!-- ============ OATH SIGN-UP MODAL ============ -->
+<div class="oath-modal" id="oathModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="oathModalTitle">
+    <div class="oath-modal-card" role="document">
+        <button type="button" class="oath-modal-close" id="oathModalClose" aria-label="Close">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <p class="oath-modal-kicker">— sign the pledge</p>
+        <h3 class="oath-modal-title" id="oathModalTitle">Your name goes here.</h3>
+        <form id="oathForm" novalidate>
+            <div class="oath-fields">
+                <label class="oath-field">
+                    <span>Name</span>
+                    <input type="text" name="name" autocomplete="name" required autofocus>
+                </label>
+                <label class="oath-field">
+                    <span>Email</span>
+                    <input type="email" name="email" autocomplete="email" required>
+                </label>
+                <label class="oath-field">
+                    <span>Phone <em>(optional)</em></span>
+                    <input type="tel" name="phone" autocomplete="tel">
+                </label>
+                <label class="oath-field">
+                    <span>Password</span>
+                    <input type="password" name="password" autocomplete="new-password" minlength="8" required>
+                </label>
             </div>
-        </div>
-    </footer>
+            <button type="submit" class="btn btn-primary btn-xl oath-modal-submit">
+                Take the oath →
+            </button>
+            <p class="oath-fine">No spam. No lists sold. Just Sam saying hey.</p>
+        </form>
+    </div>
+</div>
 
-    <script src="js/main.js"></script>
+<!-- ============ FOOTER ============ -->
+<footer class="foot">
+    <div class="container foot-inner">
+        <div class="foot-brand">Sam Watts</div>
+        <p class="foot-tag">Just some guys. ·
+            <a href="https://www.instagram.com/mini_watts/" target="_blank" rel="noopener">IG</a> ·
+            <a href="https://youtube.com/@samuelwatts5995" target="_blank" rel="noopener">YT</a> ·
+            <a href="https://www.tiktok.com/@.theguynextdoor" target="_blank" rel="noopener">TT</a>
+        </p>
+        <p class="foot-copy">© <span id="year">2026</span> · thesamwatts.com · m8 forever</p>
+    </div>
+</footer>
+
+<!-- ============ LIGHTBOX MODAL ============ -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lb-stage" id="lbStage"></div>
+    <p class="lb-caption" id="lbCaption"></p>
+    <button class="lb-btn lb-close" id="lbClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <button class="lb-btn lb-sound" id="lbSound" aria-label="Toggle sound">
+        <svg id="lbSoundIcon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 10v4h4l5 4V6l-5 4H3z"/><path fill="currentColor" d="M16.5 12a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12z" opacity=".5"/></svg>
+        <span id="lbSoundLabel">sound</span>
+    </button>
+    <button class="lb-btn lb-prev" id="lbPrev" aria-label="Previous">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="lb-btn lb-next" id="lbNext" aria-label="Next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+</div>
+
+<!-- ============ LOGIN MODAL ============ -->
+<div class="oath-modal" id="loginModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+    <div class="oath-modal-card" role="document">
+        <button type="button" class="oath-modal-close" id="loginClose" aria-label="Close">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <p class="oath-modal-kicker">— welcome back, m8</p>
+        <h3 class="oath-modal-title" id="loginModalTitle">Log in to the crew.</h3>
+        <form id="loginForm" novalidate>
+            <div class="oath-fields">
+                <label class="oath-field">
+                    <span>Email</span>
+                    <input type="email" name="email" autocomplete="email" required>
+                </label>
+                <label class="oath-field">
+                    <span>Password</span>
+                    <input type="password" name="password" autocomplete="current-password" required>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-xl oath-modal-submit">
+                Ride in →
+            </button>
+            <p class="oath-fine">Forgot it? <a href="#join">Take the oath again.</a></p>
+        </form>
+    </div>
+</div>
+
+<script src="js/main.js"></script>
 </body>
 </html>
