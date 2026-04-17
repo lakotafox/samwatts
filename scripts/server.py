@@ -89,9 +89,27 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 length = int(self.headers.get("Content-Length", 0))
                 body = json.loads(self.rfile.read(length) or b"{}")
                 msg = (body.get("message") or "editor: publish from admin").strip()
+                files = body.get("files") or []
+
+                # write each file first (HTML or base64 blob)
+                ALLOWED = ("index.html", "assets/published/", "media-browser/index.json")
+                for f in files:
+                    p = (f.get("path") or "").lstrip("/")
+                    if not p or not any(p == a or p.startswith(a) for a in ALLOWED):
+                        return self._json(403, {"error": f"path not allowed: {p}"})
+                    target = (ROOT / p).resolve()
+                    if ROOT not in target.parents and target != ROOT:
+                        return self._json(403, {"error": "path escapes root"})
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    if isinstance(f.get("contentB64"), str):
+                        target.write_bytes(base64.b64decode(f["contentB64"]))
+                    elif isinstance(f.get("content"), str):
+                        target.write_text(f["content"], encoding="utf-8")
+                    else:
+                        return self._json(400, {"error": f"file {p} needs content or contentB64"})
+
                 log_path = ROOT / "scripts" / "publish.log"
                 log = open(log_path, "w")
-                # run: git add -A && git commit -m "..." && git push
                 def run(cmd):
                     log.write(f"\n$ {' '.join(cmd)}\n")
                     log.flush()
@@ -100,7 +118,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 if run(["git", "add", "-A"]) != 0:
                     log.close()
                     return self._json(500, {"error": "git add failed", "log": "scripts/publish.log"})
-                # commit may fail if nothing to commit — treat that as success
                 commit_rc = run(["git", "commit", "-m", msg])
                 if commit_rc not in (0, 1):
                     log.close()
@@ -109,7 +126,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 log.close()
                 if push_rc != 0:
                     return self._json(500, {"error": "git push failed — check scripts/publish.log", "log": "scripts/publish.log"})
-                return self._json(200, {"ok": True, "committed": commit_rc == 0, "pushed": True})
+                return self._json(200, {"ok": True, "committed": commit_rc == 0, "pushed": True, "files": len(files)})
             except Exception as e:
                 return self._json(500, {"error": str(e)})
 

@@ -177,6 +177,12 @@
 let library = [];
 let filterType = 'all';
 let searchQ = '';
+// pending uploads not yet committed anywhere — keyed by site path.
+// On save/publish, these get written (locally) or committed (on live).
+let pendingUploads = {};
+// Blob-URL → final site path. Used to rewrite the saved HTML so that the
+// persisted file uses a real URL, not a session-local blob:.
+let blobSwaps = {};
 let selectedEl = null;   // iframe element currently picked
 let selectedSlotId = ''; // stable slot identifier
 let edits = {};          // { slotId: { newSrc, newPoster, newType, caption } }
@@ -332,6 +338,23 @@ function slotThumbUrl(el){
   return innerImg ? innerImg.src : '';
 }
 
+function swapElementType(oldEl, newTag, attrs){
+  const doc = oldEl.ownerDocument;
+  const neu = doc.createElement(newTag);
+  // preserve original class + editor marker
+  if (oldEl.className) neu.className = oldEl.className;
+  for (const [k,v] of Object.entries(attrs || {})) {
+    if (v === '' || v === true) neu.setAttribute(k, '');
+    else if (v) neu.setAttribute(k, v);
+  }
+  // re-attach the edit-selected outline so the user still sees their selection
+  neu.classList.add('__ed-slot', '__ed-selected');
+  neu.addEventListener('click', oldEl.__edClick || ((e) => e.stopPropagation()), true);
+  oldEl.replaceWith(neu);
+  selectedEl = neu;
+  return neu;
+}
+
 function currentSrcOf(el){
   if (el.tagName === 'VIDEO') return el.getAttribute('src') || '';
   if (el.tagName === 'IMG')   return el.getAttribute('src') || '';
@@ -341,34 +364,58 @@ function currentSrcOf(el){
 function applyPick(item){
   if (!selectedEl){ setStatus('warn', 'pick a slot first'); return; }
   const el = selectedEl;
-  const mediaRel = (item.videos && item.videos[0]) || (item.images && item.images[0]) || item.thumb;
-  // index.json paths begin with "/assets/..."; rewrite to relative for on-disk
-  const sitePath = mediaRel.replace(/^\//, '');
+  // Uploaded items: preview uses a blob: URL (so Sam sees the photo instantly),
+  // but the saved HTML will reference the final site path (after publish).
+  const livePreviewUrl = (item.videos && item.videos[0]) || (item.images && item.images[0]) || item.thumb;
+  const sitePath = (item._sitePath || livePreviewUrl).replace(/^\//, '');
   const isVideo = item.type === 'video';
+  // remember any blob→site-path rewrite we'll need at publish time
+  if (livePreviewUrl && livePreviewUrl.startsWith('blob:')) {
+    blobSwaps[livePreviewUrl] = '/' + sitePath;
+  }
 
+  // display URL: blob: for uploads (instant preview), site path for existing media.
+  const displaySrc = livePreviewUrl && livePreviewUrl.startsWith('blob:')
+    ? livePreviewUrl
+    : '../' + sitePath;
+  const displayThumb = (item.thumb && item.thumb.startsWith('blob:'))
+    ? item.thumb
+    : (item.thumb ? '..' + item.thumb : '');
+
+  // if the new item's type doesn't match the slot element, swap element types
+  let target = el;
+  if (el.tagName === 'VIDEO' && !isVideo){
+    target = swapElementType(el, 'img', { src: displaySrc });
+  } else if (el.tagName === 'IMG' && isVideo){
+    target = swapElementType(el, 'video', {
+      src: displaySrc,
+      poster: displayThumb,
+      autoplay: '', muted: '', loop: '', playsinline: '', controls: ''
+    });
+  }
   // update DOM in the iframe so sam sees the change immediately
-  if (el.tagName === 'VIDEO'){
-    el.src = '../' + sitePath;
-    if (item.thumb) el.poster = '..' + item.thumb;
-    try { el.load(); el.pause(); } catch(_){}
-  } else if (el.tagName === 'IMG'){
-    el.src = '../' + sitePath;
+  if (target.tagName === 'VIDEO'){
+    target.src = displaySrc;
+    if (displayThumb) target.poster = displayThumb;
+    try { target.load(); target.pause(); } catch(_){}
+  } else if (target.tagName === 'IMG'){
+    target.src = displaySrc;
   } else {
     // <li class="polaroid"> container: update data-* and its inner <img>
     if (isVideo){
       el.setAttribute('data-video',   sitePath);
       el.setAttribute('data-fullsrc', sitePath);
       el.setAttribute('data-type',    'video');
-      if (item.thumb) el.setAttribute('data-poster', item.thumb.replace(/^\//,''));
+      if (item.thumb) el.setAttribute('data-poster', (item.thumb || '').replace(/^\//,''));
       const innerImg = el.querySelector('img');
-      if (innerImg && item.thumb) innerImg.src = '..' + item.thumb;
+      if (innerImg) innerImg.src = displayThumb || displaySrc;
     } else {
       el.removeAttribute('data-video');
       el.removeAttribute('data-poster');
       el.setAttribute('data-fullsrc', sitePath);
       el.setAttribute('data-type',    'photo');
       const innerImg = el.querySelector('img');
-      if (innerImg) innerImg.src = '../' + sitePath;
+      if (innerImg) innerImg.src = displaySrc;
     }
     if (item.caption) el.setAttribute('data-caption', item.caption.slice(0, 200));
     // auto-update the visible polaroid caption (first phrase, lowercase, ~40 chars)
@@ -388,22 +435,21 @@ function applyPick(item){
 
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-/* ========= save ========= */
+/* ========= save draft ========= */
 async function save(opts = {}){
   if (!Object.keys(edits).length){
-    if (!opts.silent) setStatus('warn', 'no edits to save');
+    if (!opts.silent) setStatus('warn', 'nothing to save');
+    return;
+  }
+  const isLocal = /^(127\.0\.0\.1|localhost)/.test(location.host);
+  if (!isLocal){
+    // On the live admin, "save draft" keeps the edits in the browser only.
+    // Hitting Publish is what actually commits and goes live.
+    if (!opts.silent) setStatus('ok', 'draft kept in this browser — hit publish to go live');
     return;
   }
   setStatus('ok', 'saving…');
-  // Grab the iframe's live DOM, serialize, POST to /api/save
-  const doc = frame.contentDocument;
-  // strip our editor-only artifacts before writing
-  doc.querySelectorAll('.__ed-slot').forEach(el => el.classList.remove('__ed-slot', '__ed-selected'));
-  doc.querySelectorAll('style').forEach(s => { if (s.textContent.includes('__ed-slot')) s.remove(); });
-  // restore autoplay we stripped so the saved file plays for real visitors
-  doc.querySelectorAll('.hero-video video').forEach(v => v.setAttribute('autoplay',''));
-
-  const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+  const html = buildPublishHtml();
   try {
     const r = await fetch('/api/save', {
       method:'POST',
@@ -457,47 +503,55 @@ function wire(){
 }
 
 /* ========= publish flow ========= */
-async function publish(){
-  if (Object.keys(edits).length){
-    // have unsaved edits — save them first (silent)
-    try { await save({silent:true}); } catch(_){ setStatus('warn', 'save failed, aborting publish'); return; }
+function buildPublishHtml(){
+  // grab the iframe's current DOM, strip editor-only markers, serialize
+  const doc = frame.contentDocument;
+  doc.querySelectorAll('.__ed-slot').forEach(el => el.classList.remove('__ed-slot','__ed-selected'));
+  doc.querySelectorAll('style').forEach(s => { if (s.textContent.includes('__ed-slot')) s.remove(); });
+  doc.querySelectorAll('.hero-video video').forEach(v => v.setAttribute('autoplay',''));
+  let html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+  // rewrite blob: preview URLs to their final site paths
+  for (const [blob, sitePath] of Object.entries(blobSwaps)) {
+    while (html.includes(blob)) html = html.replace(blob, sitePath);
   }
+  return html;
+}
+
+async function publish(){
   const ov = $('#pubOverlay');
   ov.classList.remove('done'); ov.classList.add('on');
-  // reset steps
   ['step1','step2','step3','step4'].forEach(id => { const s = $('#'+id); s.classList.remove('active','doing','err'); });
   $('#pubTitle').textContent = 'publishing to thesamwatts.com…';
   $('#pubSub').textContent = 'this should take about 60 seconds';
   closeGames();
 
-  // step 1 is implicitly done (save happened above)
+  markStep('step1', 'doing');
+  const html = buildPublishHtml();
+  // include any uploaded files that are actually referenced in the final HTML
+  const usedUploads = Object.values(pendingUploads).filter(u => html.includes(u.path));
+  const files = [
+    { path: 'index.html', content: html },
+    ...usedUploads.map(u => ({ path: u.path, contentB64: u.contentB64 })),
+  ];
   markStep('step1', 'active');
   markStep('step2', 'doing');
 
   let result;
   try {
     const isLocal = /^(127\.0\.0\.1|localhost)/.test(location.host);
-    if (isLocal) {
-      // local dev server: git add && commit && push
-      const r = await fetch('/api/publish', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message:'editor: publish from admin' }) });
-      result = await r.json();
-      if (!r.ok || result.error) throw new Error(result.error || r.statusText);
-    } else {
-      // live on Netlify: POST the edited index.html to the serverless function
-      const html = await (await fetch('/index.html?t=' + Date.now(), { cache:'no-store' })).text();
-      const adminPw = sessionStorage.getItem('sw-admin-pw') || prompt('Admin password:') || '';
-      sessionStorage.setItem('sw-admin-pw', adminPw);
-      const r = await fetch('/.netlify/functions/publish', {
-        method:'POST',
-        headers:{'Content-Type':'application/json', 'X-Admin-Password': adminPw},
-        body: JSON.stringify({
-          message: 'editor: publish from admin',
-          files: [{ path: 'index.html', content: html }],
-        }),
-      });
-      result = await r.json();
-      if (!r.ok || result.error) throw new Error(result.error || r.statusText);
+    const url = isLocal ? '/api/publish' : '/.netlify/functions/publish';
+    const headers = { 'Content-Type': 'application/json' };
+    if (!isLocal){
+      const pw = sessionStorage.getItem('sw-admin-pw') || prompt('Admin password:') || '';
+      sessionStorage.setItem('sw-admin-pw', pw);
+      headers['X-Admin-Password'] = pw;
     }
+    const r = await fetch(url, {
+      method: 'POST', headers,
+      body: JSON.stringify({ message: 'editor: publish from admin', files }),
+    });
+    result = await r.json();
+    if (!r.ok || result.error) throw new Error(result.error || r.statusText);
   } catch (e) {
     markStep('step2', 'err');
     $('#pubTitle').textContent = 'publish failed';
@@ -505,6 +559,9 @@ async function publish(){
     ov.classList.add('done');
     return;
   }
+
+  // successfully committed — clear pending state
+  edits = {}; pendingUploads = {}; blobSwaps = {}; bumpCount();
   markStep('step2', 'active');
   markStep('step3', 'doing');
 
@@ -569,35 +626,16 @@ async function handleUpload(fileList){
   if (!files.length) return;
   const prog = $('#uploadProgress');
   prog.style.display = 'block';
-  const isLocal = /^(127\.0\.0\.1|localhost)/.test(location.host);
-  let done = 0;
-  const added = [];
+  let added = 0;
   for (const f of files){
-    prog.textContent = `uploading ${done+1}/${files.length}: ${f.name}`;
     try {
+      prog.textContent = `reading ${added+1}/${files.length}: ${f.name}`;
       const b64 = await fileToBase64(f);
       const stamp  = new Date().toISOString().slice(0,19).replace('T','_').replace(/:/g,'-');
       const safe   = f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      // land uploads directly in assets/published/ so they ship on publish
       const relPath = `assets/published/upload_${stamp}_${safe}`;
-      const body = JSON.stringify({ path: relPath, contentB64: b64, filename: f.name, mime: f.type });
-      const url  = isLocal ? '/api/upload' : '/.netlify/functions/publish';
-      const payload = isLocal
-        ? body
-        : JSON.stringify({
-            message: `upload: ${safe}`,
-            files: [{ path: relPath, contentB64: b64 }],
-          });
-      const headers = { 'Content-Type': 'application/json' };
-      if (!isLocal){
-        const pw = sessionStorage.getItem('sw-admin-pw') || prompt('Admin password:') || '';
-        sessionStorage.setItem('sw-admin-pw', pw);
-        headers['X-Admin-Password'] = pw;
-      }
-      const r = await fetch(url, { method: 'POST', headers, body: payload });
-      const j = await r.json();
-      if (!r.ok || j.error) throw new Error(j.error || r.statusText);
-      const type = f.type.startsWith('video') ? 'video' : 'photo';
+      const type   = f.type.startsWith('video') ? 'video' : 'photo';
+      const localUrl = URL.createObjectURL(f);  // instant preview — blob: URL
       const item = {
         id:     `up_${stamp}_${safe}`,
         source: 'upload',
@@ -605,24 +643,25 @@ async function handleUpload(fileList){
         date:   stamp.slice(0,10),
         time:   stamp.slice(11).replace(/-/g,':'),
         shortcode: safe,
-        videos: type === 'video' ? ['/' + relPath] : [],
-        images: type === 'photo' ? ['/' + relPath] : [],
-        thumb:  '/' + relPath,
+        videos: type === 'video' ? [localUrl] : [],   // use blob for preview
+        images: type === 'photo' ? [localUrl] : [],
+        thumb:  localUrl,
+        _sitePath: '/' + relPath,                     // path that'll ship on publish
+        _pendingUpload: { path: relPath, contentB64: b64 },
         caption: f.name,
         url:    '#',
       };
       library.unshift(item);
-      added.push(item);
+      pendingUploads[relPath] = { path: relPath, contentB64: b64 };
+      added++;
     } catch (e) {
-      console.error('upload failed', f.name, e);
       prog.textContent = `❌ ${f.name}: ${e.message}`;
-      await new Promise(r => setTimeout(r, 2500));
+      await new Promise(r => setTimeout(r, 1500));
     }
-    done++;
   }
-  prog.textContent = `✓ uploaded ${added.length}/${files.length}`;
+  prog.textContent = `✓ added ${added} — will go live when you hit publish`;
   setTimeout(() => { prog.style.display = 'none'; prog.textContent = ''; }, 2500);
-  $('#libStats').textContent = `${library.length} posts · newest first · ${added.length} just uploaded`;
+  $('#libStats').textContent = `${library.length} posts · ${added} new`;
   renderLibrary();
 }
 
