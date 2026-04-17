@@ -263,11 +263,11 @@ function initFrame(){
     a.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); }, true);
   });
 
-  // find every replaceable media slot
+  // find every replaceable media slot (tolerant of after-edit type swaps)
   const slots = new Set();
   doc.querySelectorAll('[data-fullsrc], [data-video]').forEach(el => slots.add(el));
-  doc.querySelectorAll('.hero-video video').forEach(el => slots.add(el));
-  doc.querySelectorAll('.about-photo img').forEach(el => slots.add(el));
+  doc.querySelectorAll('.hero-video video, .hero-video img').forEach(el => slots.add(el));
+  doc.querySelectorAll('.about-photo img, .about-photo video').forEach(el => slots.add(el));
 
   slots.forEach(el => {
     el.classList.add('__ed-slot');
@@ -336,9 +336,12 @@ function swapElementType(oldEl, newTag, attrs){
     if (v === '' || v === true) neu.setAttribute(k, '');
     else if (v) neu.setAttribute(k, v);
   }
-  // re-attach the edit-selected outline so the user still sees their selection
   neu.classList.add('__ed-slot', '__ed-selected');
-  neu.addEventListener('click', oldEl.__edClick || ((e) => e.stopPropagation()), true);
+  // give the new element the same click-to-select behavior as every other slot
+  neu.addEventListener('click', e => {
+    e.preventDefault(); e.stopPropagation();
+    selectSlot(neu);
+  }, true);
   oldEl.replaceWith(neu);
   selectedEl = neu;
   return neu;
