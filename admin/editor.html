@@ -278,6 +278,9 @@ function initFrame(){
   slots.forEach(el => {
     el.classList.add('__ed-slot');
     el.addEventListener('click', e => {
+      // if the click landed on an editable text node (e.g. polaroid caption),
+      // let it handle itself — don't swallow.
+      if (e.target.closest('.__ed-text')) return;
       e.preventDefault(); e.stopPropagation();
       selectSlot(el);
     }, true);
@@ -297,9 +300,11 @@ function initFrame(){
   ].join(',');
   const seen = new Set();
   doc.querySelectorAll(textSel).forEach(el => {
-    // skip if already wrapped, inside a media slot, or has no text
+    // skip if already wrapped or has no text
     if (seen.has(el)) return;
-    if (el.closest('.__ed-slot')) return;
+    // skip the slot container itself, but allow text elements inside it
+    // (e.g. .polaroid-caption lives inside a .polaroid slot)
+    if (el.classList.contains('__ed-slot')) return;
     if (el.matches('script,style,a[href]:not([href^="#"])')) return;
     const txt = el.textContent.trim();
     if (!txt || txt.length > 1000) return;
