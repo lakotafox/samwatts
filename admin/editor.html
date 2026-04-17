@@ -639,7 +639,8 @@ async function handleUpload(fileList){
       const b64 = await fileToBase64(f);
       const stamp  = new Date().toISOString().slice(0,19).replace('T','_').replace(/:/g,'-');
       const safe   = f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const relPath = `assets/uploads/${stamp}_${safe}`;
+      // land uploads directly in assets/published/ so they ship on publish
+      const relPath = `assets/published/upload_${stamp}_${safe}`;
       const body = JSON.stringify({ path: relPath, contentB64: b64, filename: f.name, mime: f.type });
       const url  = isLocal ? '/api/upload' : '/.netlify/functions/publish';
       const payload = isLocal

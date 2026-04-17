@@ -14,7 +14,7 @@ const DEFAULTS = {
   branch: process.env.GITHUB_BRANCH || 'main',
 };
 
-const ALLOWED_PATHS = /^(index\.html|assets\/ig-scrape\/.+|assets\/tt-scrape\/.+|assets\/yt-scrape\/.+|media-browser\/index\.json)$/;
+const ALLOWED_PATHS = /^(index\.html|assets\/published\/.+|media-browser\/index\.json)$/;
 
 exports.handler = async (event) => {
   const cors = {
@@ -42,8 +42,10 @@ exports.handler = async (event) => {
   if (!files.length) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'no files to publish' }) };
 
   for (const f of files) {
-    if (!f.path || typeof f.content !== 'string')     return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'each file needs {path, content}' }) };
-    if (!ALLOWED_PATHS.test(f.path))                  return { statusCode: 403, headers: cors, body: JSON.stringify({ error: `path not allowed: ${f.path}` }) };
+    const hasText = typeof f.content === 'string';
+    const hasBin  = typeof f.contentB64 === 'string';
+    if (!f.path || (!hasText && !hasBin)) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'each file needs {path, content|contentB64}' }) };
+    if (!ALLOWED_PATHS.test(f.path))      return { statusCode: 403, headers: cors, body: JSON.stringify({ error: `path not allowed: ${f.path}` }) };
   }
 
   const gh = async (path, init = {}) => {
@@ -72,7 +74,7 @@ exports.handler = async (event) => {
         const cur = await gh(`/repos/${owner}/${repo}/contents/${f.path}?ref=${branch}`);
         sha = cur.sha;
       } catch (_) { /* new file */ }
-      const contentB64 = Buffer.from(f.content, 'utf-8').toString('base64');
+      const contentB64 = f.contentB64 || Buffer.from(f.content, 'utf-8').toString('base64');
       const put = await gh(`/repos/${owner}/${repo}/contents/${f.path}`, {
         method:  'PUT',
         headers: { 'Content-Type': 'application/json' },

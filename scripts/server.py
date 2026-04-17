@@ -11,13 +11,45 @@ Then: open http://127.0.0.1:8765/admin/editor.html
 import http.server
 import socketserver
 import json
+import re
+import shutil
 import subprocess
 import sys
 import threading
+import base64
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PORT = 8765
+PUBLISHED = ROOT / "assets" / "published"
+SCRAPE_REF_RE = re.compile(r'assets/(?:ig-scrape/(?:photos|videos|posters)?/?|tt-scrape/|yt-scrape/)([A-Za-z0-9_.\-/]+\.(?:jpg|jpeg|png|webp|mp4|webm|mkv|mov))')
+
+
+def promote_scrape_refs(html: str) -> tuple[str, list[str]]:
+    """For every /assets/{ig,tt,yt}-scrape/... reference in the HTML:
+    copy the file into assets/published/ and rewrite the reference.
+    Returns (new_html, list_of_newly_copied_paths_relative_to_root).
+    """
+    PUBLISHED.mkdir(parents=True, exist_ok=True)
+    copied: list[str] = []
+
+    def _replace(m: re.Match) -> str:
+        # m.group(0) is the full matched path like assets/tt-scrape/foo.mp4
+        full = m.group(0)
+        src = ROOT / full
+        # take just the filename for the published slot
+        dest_name = Path(full).name
+        dest = PUBLISHED / dest_name
+        try:
+            if src.exists() and not dest.exists():
+                shutil.copy2(src, dest)
+                copied.append(f"assets/published/{dest_name}")
+        except Exception as e:
+            sys.stderr.write(f"[promote] failed to copy {src}: {e}\n")
+        return f"assets/published/{dest_name}"
+
+    new_html = SCRAPE_REF_RE.sub(_replace, html)
+    return new_html, copied
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -52,12 +84,41 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 # only allow html files for now
                 if target.suffix.lower() not in (".html", ".json"):
                     return self._json(403, {"error": "only .html/.json savable"})
+                # when saving index.html, auto-promote any scrape-path media
+                # references into /assets/published/ so they actually ship.
+                copied: list[str] = []
+                if target.name == "index.html":
+                    content, copied = promote_scrape_refs(content)
                 # backup-on-save (latest only)
                 if target.exists():
                     (target.with_suffix(target.suffix + ".bak")).write_text(
                         target.read_text(encoding="utf-8"), encoding="utf-8"
                     )
                 target.write_text(content, encoding="utf-8")
+                return self._json(200, {
+                    "ok": True,
+                    "path": str(target.relative_to(ROOT)),
+                    "promoted": copied,
+                })
+            except Exception as e:
+                return self._json(500, {"error": str(e)})
+
+        if self.path == "/api/upload":
+            try:
+                length = int(self.headers.get("Content-Length", 0))
+                body = json.loads(self.rfile.read(length) or b"{}")
+                rel = (body.get("path") or "").lstrip("/")
+                b64 = body.get("contentB64") or ""
+                if not rel or not b64:
+                    return self._json(400, {"error": "missing path or contentB64"})
+                # must land under assets/uploads or assets/published
+                if not (rel.startswith("assets/uploads/") or rel.startswith("assets/published/")):
+                    return self._json(403, {"error": "uploads only allowed under assets/uploads/ or assets/published/"})
+                target = (ROOT / rel).resolve()
+                if ROOT not in target.parents:
+                    return self._json(403, {"error": "path escapes root"})
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(base64.b64decode(b64))
                 return self._json(200, {"ok": True, "path": str(target.relative_to(ROOT))})
             except Exception as e:
                 return self._json(500, {"error": str(e)})
