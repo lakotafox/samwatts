@@ -169,6 +169,8 @@ let pendingUploads = {};
 // Blob-URL → final site path. Used to rewrite the saved HTML so that the
 // persisted file uses a real URL, not a session-local blob:.
 let blobSwaps = {};
+// Count of text edits (separate from media edits since there's no slot id)
+let textEditCount = 0;
 let selectedEl = null;   // iframe element currently picked
 let selectedSlotId = ''; // stable slot identifier
 let edits = {};          // { slotId: { newSrc, newPoster, newType, caption } }
@@ -183,7 +185,8 @@ function setStatus(kind, text){
   $('#statusText').textContent = text;
 }
 function bumpCount(){
-  $('#editCount').textContent = `${Object.keys(edits).length} edit${Object.keys(edits).length===1?'':'s'}`;
+  const n = Object.keys(edits).length + textEditCount;
+  $('#editCount').textContent = `${n} edit${n===1?'':'s'}`;
 }
 function slotIdFor(el){
   // prefer explicit id, otherwise derive from class + nth-of-type
@@ -254,6 +257,9 @@ function initFrame(){
     .__ed-slot{outline:2px dashed rgba(230,163,58,.0);outline-offset:3px;cursor:pointer !important;transition:outline-color .12s}
     .__ed-slot:hover{outline-color:rgba(230,163,58,.95)}
     .__ed-slot.__ed-selected{outline:3px solid #e6a33a !important;outline-offset:4px;box-shadow:0 0 0 6px rgba(230,163,58,.18)}
+    .__ed-text{cursor:text !important;transition:outline-color .1s, background-color .1s; border-radius:3px}
+    .__ed-text:hover{outline:1px dashed rgba(230,163,58,.65);outline-offset:3px}
+    .__ed-text-active{outline:2px solid #e6a33a !important;outline-offset:3px;background:rgba(230,163,58,.12) !important;box-shadow:0 0 0 5px rgba(230,163,58,.08)}
   `;
   doc.head.appendChild(style);
 
@@ -280,7 +286,61 @@ function initFrame(){
   // pause autoplay videos so they don't distract / waste CPU during editing
   doc.querySelectorAll('video').forEach(v => { try { v.pause(); v.removeAttribute('autoplay'); } catch(_){} });
 
-  setStatus('ok', `ready · ${slots.size} editable slots`);
+  // make headlines, captions, and body copy click-to-edit
+  const textSel = [
+    'h1','h2','h3','h4',
+    '.section-title','.section-eyebrow','.section-intro',
+    '.polaroid-caption','.video-caption',
+    '.news-headline','.news-body','.news-date',
+    '.quote','.pitch-strong','.hero-kicker','.hero-title','.hero-pitch',
+    'p','li','blockquote','strong','em','span.pitch-strong'
+  ].join(',');
+  const seen = new Set();
+  doc.querySelectorAll(textSel).forEach(el => {
+    // skip if already wrapped, inside a media slot, or has no text
+    if (seen.has(el)) return;
+    if (el.closest('.__ed-slot')) return;
+    if (el.matches('script,style,a[href]:not([href^="#"])')) return;
+    const txt = el.textContent.trim();
+    if (!txt || txt.length > 1000) return;
+    seen.add(el);
+    el.classList.add('__ed-text');
+    el.dataset.__edOrig = el.innerHTML;
+    el.addEventListener('click', e => {
+      if (el.isContentEditable) return;
+      // don't swallow clicks on actual links/buttons inside text blocks
+      if (e.target.closest('a[href]:not([href^="#"]), button')) return;
+      e.preventDefault(); e.stopPropagation();
+      el.contentEditable = 'true';
+      el.classList.add('__ed-text-active');
+      el.focus();
+      const r = doc.createRange(); r.selectNodeContents(el);
+      const s = el.ownerDocument.defaultView.getSelection();
+      s.removeAllRanges(); s.addRange(r);
+    }, true);
+    el.addEventListener('blur', () => {
+      if (!el.isContentEditable) return;
+      el.contentEditable = 'false';
+      el.classList.remove('__ed-text-active');
+      if (el.innerHTML !== el.dataset.__edOrig){
+        textEditCount++;
+        el.dataset.__edOrig = el.innerHTML;
+        bumpCount();
+        setStatus('ok', 'text updated — hit publish when ready');
+      }
+    });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey && !el.matches('p,li,blockquote')) {
+        e.preventDefault(); el.blur();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        el.innerHTML = el.dataset.__edOrig;
+        el.blur();
+      }
+    });
+  });
+
+  setStatus('ok', `ready · ${slots.size} media slots · ${seen.size} text blocks`);
 }
 
 function selectSlot(el){
@@ -429,7 +489,7 @@ function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<
 
 /* ========= save draft ========= */
 async function save(opts = {}){
-  if (!Object.keys(edits).length){
+  if (!Object.keys(edits).length && !textEditCount){
     if (!opts.silent) setStatus('warn', 'nothing to save');
     return;
   }
@@ -484,9 +544,9 @@ function wire(){
     e.target.value = '';
   });
   $('#btnRevert').onclick = () => {
-    if (!Object.keys(edits).length) return;
+    if (!Object.keys(edits).length && !textEditCount) return;
     if (!confirm('Throw away unsaved edits?')) return;
-    edits = {}; bumpCount();
+    edits = {}; textEditCount = 0; pendingUploads = {}; blobSwaps = {}; bumpCount();
     frame.src = '../index.html?edit=1&t=' + Date.now();
     setStatus('ok', 'reverted');
   };
@@ -499,7 +559,14 @@ function buildPublishHtml(){
   const doc = frame.contentDocument;
   const clone = doc.documentElement.cloneNode(true);
   clone.querySelectorAll('.__ed-slot').forEach(el => el.classList.remove('__ed-slot','__ed-selected'));
-  clone.querySelectorAll('style').forEach(s => { if (s.textContent.includes('__ed-slot')) s.remove(); });
+  clone.querySelectorAll('.__ed-text, .__ed-text-active').forEach(el => {
+    el.classList.remove('__ed-text','__ed-text-active');
+    el.removeAttribute('contenteditable');
+    delete el.dataset.__edOrig;
+  });
+  clone.querySelectorAll('style').forEach(s => {
+    if (s.textContent.includes('__ed-slot') || s.textContent.includes('__ed-text')) s.remove();
+  });
   clone.querySelectorAll('.hero-video video').forEach(v => v.setAttribute('autoplay',''));
   let html = '<!DOCTYPE html>\n' + clone.outerHTML;
   // rewrite blob: preview URLs to their final site paths
@@ -552,7 +619,7 @@ async function publish(){
   }
 
   // successfully committed — clear pending state
-  edits = {}; pendingUploads = {}; blobSwaps = {}; bumpCount();
+  edits = {}; pendingUploads = {}; blobSwaps = {}; textEditCount = 0; bumpCount();
   markStep('step2', 'active');
   markStep('step3', 'doing');
 
