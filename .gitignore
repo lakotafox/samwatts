@@ -2,25 +2,21 @@
 .DS_Store
 **/.DS_Store
 
-# NetBeans leftovers (from older commits)
+# NetBeans leftovers
 /NetBeansProjects/hello_world/nbproject/private/
 /NetBeansProjects/MinCoins/nbproject/private/
 /NetBeansProjects/MinCoins/build/
 
-# TikTok + YouTube scrapes — files often exceed GitHub's 100MB limit.
-# Keep them local-only until we wire up a CDN (Cloudinary / similar).
+# Local scrape libraries — HUGE, laptop-only.
+# Only files copied to assets/published/ actually ship to the live site.
+/assets/ig-scrape/
 /assets/tt-scrape/
 /assets/yt-scrape/
 
-# Instaloader session + archive state (machine-local)
-/assets/ig-scrape/mini_watts_id
-/assets/ig-scrape/.instaloader-session
-/assets/*-scrape/archive.txt
-
-# Local dev-server logs
+# Local dev-server + scraper logs
 /scripts/*.log
 
-# Editor backup (generated on each save)
+# Editor backup
 /index.html.bak
 /*.bak
 

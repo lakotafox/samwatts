@@ -67,6 +67,7 @@
   .lib-card .src.ig{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)}
   .lib-card .src.tt{background:#000;border:1px solid #ff0050}
   .lib-card .src.yt{background:#ff0000}
+  .lib-card .src.up{background:#5bd46c;color:#0d1a0d}
   .lib-card .meta{padding:.42rem .55rem .5rem;display:flex;flex-direction:column;gap:.18rem;min-height:3.1rem}
   .lib-card .date{font:600 .7rem/1 monospace;color:var(--ink-soft);letter-spacing:.02em}
   .lib-card .cap{font-size:.72rem;line-height:1.3;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -142,7 +143,11 @@
       <button class="chip" data-src="instagram">IG</button>
       <button class="chip" data-src="tiktok">TT</button>
       <button class="chip" data-src="youtube">YT</button>
+      <button class="chip" data-src="upload">mine</button>
     </div>
+    <button class="btn" id="btnUpload" style="width:100%;margin-top:.25rem">📁 upload from computer / camera roll</button>
+    <input type="file" id="uploadInput" accept="image/*,video/*" multiple style="display:none">
+    <div id="uploadProgress" style="display:none;font-size:.76rem;color:var(--ink-soft);padding:.3rem .1rem"></div>
   </div>
   <div class="library" id="library"></div>
 </aside>
@@ -244,7 +249,7 @@ function renderLibrary(){
     c.title = (it.caption || '(no caption)');
     const cap = (it.caption || '').replace(/\s+/g, ' ').trim();
     const src = (it.source || 'instagram');
-    const srcTag = src === 'instagram' ? 'ig' : (src === 'tiktok' ? 'tt' : 'yt');
+    const srcTag = ({instagram:'ig', tiktok:'tt', youtube:'yt', upload:'up'})[src] || 'ig';
     c.innerHTML = `
       <div class="thumb">
         <img loading="lazy" src="..${it.thumb}">
@@ -497,6 +502,11 @@ function wire(){
     closeGames();
   };
   $('#btnPlayGame').onclick = openGames;
+  $('#btnUpload').onclick = () => $('#uploadInput').click();
+  $('#uploadInput').addEventListener('change', e => {
+    handleUpload(e.target.files);
+    e.target.value = '';
+  });
   $('#btnRefresh').onclick = refreshScrape;
   $('#btnRevert').onclick = () => {
     if (!Object.keys(edits).length) return;
@@ -603,6 +613,77 @@ function markStep(id, state){
   const s = $('#'+id);
   s.classList.remove('doing','active','err');
   if (state) s.classList.add(state);
+}
+
+/* ========= upload from computer / camera roll ========= */
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onerror = () => reject(r.error);
+    r.onload  = () => resolve(r.result.split(',')[1]);
+    r.readAsDataURL(file);
+  });
+}
+
+async function handleUpload(fileList){
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  const prog = $('#uploadProgress');
+  prog.style.display = 'block';
+  const isLocal = /^(127\.0\.0\.1|localhost)/.test(location.host);
+  let done = 0;
+  const added = [];
+  for (const f of files){
+    prog.textContent = `uploading ${done+1}/${files.length}: ${f.name}`;
+    try {
+      const b64 = await fileToBase64(f);
+      const stamp  = new Date().toISOString().slice(0,19).replace('T','_').replace(/:/g,'-');
+      const safe   = f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const relPath = `assets/uploads/${stamp}_${safe}`;
+      const body = JSON.stringify({ path: relPath, contentB64: b64, filename: f.name, mime: f.type });
+      const url  = isLocal ? '/api/upload' : '/.netlify/functions/publish';
+      const payload = isLocal
+        ? body
+        : JSON.stringify({
+            message: `upload: ${safe}`,
+            files: [{ path: relPath, contentB64: b64 }],
+          });
+      const headers = { 'Content-Type': 'application/json' };
+      if (!isLocal){
+        const pw = sessionStorage.getItem('sw-admin-pw') || prompt('Admin password:') || '';
+        sessionStorage.setItem('sw-admin-pw', pw);
+        headers['X-Admin-Password'] = pw;
+      }
+      const r = await fetch(url, { method: 'POST', headers, body: payload });
+      const j = await r.json();
+      if (!r.ok || j.error) throw new Error(j.error || r.statusText);
+      const type = f.type.startsWith('video') ? 'video' : 'photo';
+      const item = {
+        id:     `up_${stamp}_${safe}`,
+        source: 'upload',
+        type,
+        date:   stamp.slice(0,10),
+        time:   stamp.slice(11).replace(/-/g,':'),
+        shortcode: safe,
+        videos: type === 'video' ? ['/' + relPath] : [],
+        images: type === 'photo' ? ['/' + relPath] : [],
+        thumb:  '/' + relPath,
+        caption: f.name,
+        url:    '#',
+      };
+      library.unshift(item);
+      added.push(item);
+    } catch (e) {
+      console.error('upload failed', f.name, e);
+      prog.textContent = `❌ ${f.name}: ${e.message}`;
+      await new Promise(r => setTimeout(r, 2500));
+    }
+    done++;
+  }
+  prog.textContent = `✓ uploaded ${added.length}/${files.length}`;
+  setTimeout(() => { prog.style.display = 'none'; prog.textContent = ''; }, 2500);
+  $('#libStats').textContent = `${library.length} posts · newest first · ${added.length} just uploaded`;
+  renderLibrary();
 }
 
 /* ========= foxbuilt games (reused via iframe) ========= */
