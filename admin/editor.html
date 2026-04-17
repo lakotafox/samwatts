@@ -491,12 +491,14 @@ function wire(){
 
 /* ========= publish flow ========= */
 function buildPublishHtml(){
-  // grab the iframe's current DOM, strip editor-only markers, serialize
+  // clone the iframe's document so we can strip editor-only markers
+  // without mutating the live DOM (which would kill click handlers).
   const doc = frame.contentDocument;
-  doc.querySelectorAll('.__ed-slot').forEach(el => el.classList.remove('__ed-slot','__ed-selected'));
-  doc.querySelectorAll('style').forEach(s => { if (s.textContent.includes('__ed-slot')) s.remove(); });
-  doc.querySelectorAll('.hero-video video').forEach(v => v.setAttribute('autoplay',''));
-  let html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+  const clone = doc.documentElement.cloneNode(true);
+  clone.querySelectorAll('.__ed-slot').forEach(el => el.classList.remove('__ed-slot','__ed-selected'));
+  clone.querySelectorAll('style').forEach(s => { if (s.textContent.includes('__ed-slot')) s.remove(); });
+  clone.querySelectorAll('.hero-video video').forEach(v => v.setAttribute('autoplay',''));
+  let html = '<!DOCTYPE html>\n' + clone.outerHTML;
   // rewrite blob: preview URLs to their final site paths
   for (const [blob, sitePath] of Object.entries(blobSwaps)) {
     while (html.includes(blob)) html = html.replace(blob, sitePath);
@@ -550,6 +552,9 @@ async function publish(){
   edits = {}; pendingUploads = {}; blobSwaps = {}; bumpCount();
   markStep('step2', 'active');
   markStep('step3', 'doing');
+
+  // keep the editor usable: the iframe's DOM still has click handlers
+  // (buildPublishHtml mutated a clone, not the live tree). Nothing to do.
 
   // wait ~60s for Netlify build (we don't have the webhook yet so simulate a countdown)
   let remaining = 60;
