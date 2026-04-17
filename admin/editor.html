@@ -63,11 +63,6 @@
   .lib-card .thumb img{width:100%;height:100%;object-fit:cover;display:block}
   .lib-card .t{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.78);color:#fff;padding:2px 7px;border-radius:3px;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
   .lib-card .t.v{background:rgba(230,163,58,.95);color:#1a1306}
-  .lib-card .src{position:absolute;top:6px;right:6px;padding:2px 7px;border-radius:3px;font-size:.62rem;letter-spacing:.08em;font-weight:700;color:#fff;text-transform:uppercase}
-  .lib-card .src.ig{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)}
-  .lib-card .src.tt{background:#000;border:1px solid #ff0050}
-  .lib-card .src.yt{background:#ff0000}
-  .lib-card .src.up{background:#5bd46c;color:#0d1a0d}
   .lib-card .meta{padding:.42rem .55rem .5rem;display:flex;flex-direction:column;gap:.18rem;min-height:3.1rem}
   .lib-card .date{font:600 .7rem/1 monospace;color:var(--ink-soft);letter-spacing:.02em}
   .lib-card .cap{font-size:.72rem;line-height:1.3;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -116,7 +111,6 @@
 <div class="topbar">
   <div class="brand">samwatts editor <span>local only</span></div>
   <div class="grow"></div>
-  <button class="btn ghost" id="btnRefresh" title="pull latest posts from Instagram, TikTok, and YouTube">↻ refresh media</button>
   <button class="btn" id="btnRevert" title="throw away unsaved edits">revert</button>
   <button class="btn" id="btnSave" title="write changes to index.html on this laptop (preview only)">save draft</button>
   <button class="btn primary" id="btnPublish" title="commit and push — triggers Netlify deploy">publish live ↑</button>
@@ -138,14 +132,7 @@
       <button class="chip" data-type="photo">photos</button>
       <button class="chip" data-type="video">videos</button>
     </div>
-    <div class="filters">
-      <button class="chip active" data-src="all">all sources</button>
-      <button class="chip" data-src="instagram">IG</button>
-      <button class="chip" data-src="tiktok">TT</button>
-      <button class="chip" data-src="youtube">YT</button>
-      <button class="chip" data-src="upload">mine</button>
-    </div>
-    <button class="btn" id="btnUpload" style="width:100%;margin-top:.25rem">📁 upload from computer / camera roll</button>
+    <button class="btn primary" id="btnUpload" style="width:100%;margin-top:.25rem">📁 add from computer / camera roll</button>
     <input type="file" id="uploadInput" accept="image/*,video/*" multiple style="display:none">
     <div id="uploadProgress" style="display:none;font-size:.76rem;color:var(--ink-soft);padding:.3rem .1rem"></div>
   </div>
@@ -189,7 +176,6 @@
 /* ========= state ========= */
 let library = [];
 let filterType = 'all';
-let filterSrc  = 'all';
 let searchQ = '';
 let selectedEl = null;   // iframe element currently picked
 let selectedSlotId = ''; // stable slot identifier
@@ -236,7 +222,6 @@ function renderLibrary(){
   const q = searchQ.toLowerCase().trim();
   const items = library.filter(it => {
     if (filterType !== 'all' && it.type !== filterType) return false;
-    if (filterSrc  !== 'all' && (it.source || 'instagram') !== filterSrc) return false;
     if (q && !(it.caption||'').toLowerCase().includes(q)) return false;
     return true;
   });
@@ -248,13 +233,10 @@ function renderLibrary(){
     c.className = 'lib-card';
     c.title = (it.caption || '(no caption)');
     const cap = (it.caption || '').replace(/\s+/g, ' ').trim();
-    const src = (it.source || 'instagram');
-    const srcTag = ({instagram:'ig', tiktok:'tt', youtube:'yt', upload:'up'})[src] || 'ig';
     c.innerHTML = `
       <div class="thumb">
         <img loading="lazy" src="..${it.thumb}">
         <span class="t ${it.type==='video'?'v':''}">${it.type==='video'?'video':'photo'}</span>
-        <span class="src ${srcTag}">${srcTag}</span>
       </div>
       <div class="meta">
         <div class="date">${(it.date||'').slice(5)}</div>
@@ -442,41 +424,6 @@ async function save(opts = {}){
   }
 }
 
-/* ========= refresh ========= */
-async function refreshScrape(){
-  if (!confirm('Pull the latest posts from Instagram, TikTok, and YouTube? (takes a few minutes on a cold start, seconds on updates)')) return;
-  setStatus('ok', 'refreshing — see bottom status');
-  try {
-    const r = await fetch('/api/refresh', { method:'POST' });
-    const j = await r.json();
-    if (!r.ok || j.error) throw new Error(j.error || r.statusText);
-  } catch (e) {
-    setStatus('warn', 'refresh failed: ' + e.message); return;
-  }
-  // poll the refresh log for completion
-  const start = Date.now();
-  const poll = async () => {
-    try {
-      const r = await fetch('/api/refresh-status');
-      const j = await r.json();
-      const tail = j.tail || '';
-      const lastLine = tail.trim().split('\n').pop() || '';
-      setStatus('ok', 'refreshing · ' + lastLine.slice(0, 80));
-      if (/refresh done/i.test(tail)){
-        setStatus('ok', 'refresh complete — reloading library');
-        await loadLibrary();
-        return;
-      }
-      if (Date.now() - start > 180000){
-        setStatus('warn', 'refresh taking >3min — check scripts/refresh.log');
-        return;
-      }
-    } catch(_){}
-    setTimeout(poll, 2000);
-  };
-  setTimeout(poll, 1500);
-}
-
 /* ========= wiring ========= */
 function wire(){
   frame.addEventListener('load', initFrame);
@@ -484,13 +431,6 @@ function wire(){
     b.onclick = () => {
       filterType = b.dataset.type;
       document.querySelectorAll('.chip[data-type]').forEach(x => x.classList.toggle('active', x.dataset.type === filterType));
-      renderLibrary();
-    };
-  });
-  document.querySelectorAll('.chip[data-src]').forEach(b => {
-    b.onclick = () => {
-      filterSrc = b.dataset.src;
-      document.querySelectorAll('.chip[data-src]').forEach(x => x.classList.toggle('active', x.dataset.src === filterSrc));
       renderLibrary();
     };
   });
@@ -507,7 +447,6 @@ function wire(){
     handleUpload(e.target.files);
     e.target.value = '';
   });
-  $('#btnRefresh').onclick = refreshScrape;
   $('#btnRevert').onclick = () => {
     if (!Object.keys(edits).length) return;
     if (!confirm('Throw away unsaved edits?')) return;

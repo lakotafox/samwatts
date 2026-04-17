@@ -1,55 +1,25 @@
 #!/usr/bin/env python3
 """Tiny local dev server for thesamwatts.com editor.
 
-Serves the static site + two POST endpoints:
-  POST /api/save      -> overwrite a file inside the site root (currently index.html)
-  POST /api/refresh   -> kick off scripts/refresh.sh in the background
+Serves the static site plus:
+  POST /api/save     -> write a file (index.html) into the repo
+  POST /api/upload   -> save a base64 image/video into assets/published/
+  POST /api/publish  -> git add -A && commit && push
 
 Run:  python3 scripts/server.py
-Then: open http://127.0.0.1:8765/admin/editor.html
+Then: open http://127.0.0.1:8765/admin/
 """
 import http.server
 import socketserver
 import json
-import re
-import shutil
 import subprocess
 import sys
-import threading
 import base64
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PORT = 8765
 PUBLISHED = ROOT / "assets" / "published"
-SCRAPE_REF_RE = re.compile(r'assets/(?:ig-scrape/(?:photos|videos|posters)?/?|tt-scrape/|yt-scrape/)([A-Za-z0-9_.\-/]+\.(?:jpg|jpeg|png|webp|mp4|webm|mkv|mov))')
-
-
-def promote_scrape_refs(html: str) -> tuple[str, list[str]]:
-    """For every /assets/{ig,tt,yt}-scrape/... reference in the HTML:
-    copy the file into assets/published/ and rewrite the reference.
-    Returns (new_html, list_of_newly_copied_paths_relative_to_root).
-    """
-    PUBLISHED.mkdir(parents=True, exist_ok=True)
-    copied: list[str] = []
-
-    def _replace(m: re.Match) -> str:
-        # m.group(0) is the full matched path like assets/tt-scrape/foo.mp4
-        full = m.group(0)
-        src = ROOT / full
-        # take just the filename for the published slot
-        dest_name = Path(full).name
-        dest = PUBLISHED / dest_name
-        try:
-            if src.exists() and not dest.exists():
-                shutil.copy2(src, dest)
-                copied.append(f"assets/published/{dest_name}")
-        except Exception as e:
-            sys.stderr.write(f"[promote] failed to copy {src}: {e}\n")
-        return f"assets/published/{dest_name}"
-
-    new_html = SCRAPE_REF_RE.sub(_replace, html)
-    return new_html, copied
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -84,22 +54,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 # only allow html files for now
                 if target.suffix.lower() not in (".html", ".json"):
                     return self._json(403, {"error": "only .html/.json savable"})
-                # when saving index.html, auto-promote any scrape-path media
-                # references into /assets/published/ so they actually ship.
-                copied: list[str] = []
-                if target.name == "index.html":
-                    content, copied = promote_scrape_refs(content)
                 # backup-on-save (latest only)
                 if target.exists():
                     (target.with_suffix(target.suffix + ".bak")).write_text(
                         target.read_text(encoding="utf-8"), encoding="utf-8"
                     )
                 target.write_text(content, encoding="utf-8")
-                return self._json(200, {
-                    "ok": True,
-                    "path": str(target.relative_to(ROOT)),
-                    "promoted": copied,
-                })
+                return self._json(200, {"ok": True, "path": str(target.relative_to(ROOT))})
             except Exception as e:
                 return self._json(500, {"error": str(e)})
 
@@ -152,33 +113,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 return self._json(500, {"error": str(e)})
 
-        if self.path == "/api/refresh":
-            try:
-                script = ROOT / "scripts" / "refresh.sh"
-                if not script.exists():
-                    return self._json(500, {"error": "refresh.sh missing"})
-                log_path = ROOT / "scripts" / "refresh.log"
-                proc = subprocess.Popen(
-                    ["bash", str(script)],
-                    stdout=open(log_path, "w"),
-                    stderr=subprocess.STDOUT,
-                    cwd=str(ROOT),
-                )
-                return self._json(202, {"started": True, "pid": proc.pid, "log": "scripts/refresh.log"})
-            except Exception as e:
-                return self._json(500, {"error": str(e)})
-
         return self._json(404, {"error": "not found"})
-
-    def do_GET(self):
-        if self.path == "/api/refresh-status":
-            log_path = ROOT / "scripts" / "refresh.log"
-            tail = ""
-            if log_path.exists():
-                lines = log_path.read_text(encoding="utf-8", errors="ignore").splitlines()
-                tail = "\n".join(lines[-12:])
-            return self._json(200, {"tail": tail})
-        return super().do_GET()
 
 
 def main():

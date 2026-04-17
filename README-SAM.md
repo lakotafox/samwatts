@@ -1,6 +1,6 @@
 # thesamwatts editor — cheat sheet
 
-**What it is:** a local tool that runs on your laptop. It shows your landing page, and you click any photo or video on the page to swap it with something from your own Instagram.
+**What it is:** a tool to edit your landing page. Click a photo/video on the page to swap it.
 
 ## How to open it
 
@@ -8,21 +8,19 @@
 2. A Terminal window opens (leave it running) — the editor page opens in your browser.
 3. When you're done, close the Terminal window to shut it down.
 
-## How to edit
+## How to use it
 
-- Click any photo or video on the landing page preview.
-- The selected slot gets a yellow outline.
-- In the right sidebar, click the Instagram post you want to use.
-- Boom — it swaps in.
-- Click **save** in the top right when you're happy. (It writes to `index.html` and keeps a backup at `index.html.bak`.)
-
-## Getting new Instagram posts
-
-- Click **↻ refresh from IG** (top bar). It pulls all new posts from `@mini_watts` since last time. Takes 30–60s.
-- Needs you to be logged into Instagram in Chrome (it borrows your browser's cookies — no password entry here).
+1. On the left: your website.
+2. On the right: your media library.
+3. Click any photo or video on the left → it gets a yellow outline.
+4. Add media from your phone or computer:
+   - Click **📁 add from computer / camera roll** on the right.
+   - Pick the photos/videos you want to use (on iPhone, it shows your camera roll).
+5. Click a thumbnail from the library → it swaps into the selected slot.
+6. Click **save draft** to preview the change locally.
+7. Click **publish live ↑** to push it live to thesamwatts.com (~60 seconds to go live).
 
 ## If something breaks
 
 - Close the Terminal window and double-click `start.command` again.
-- Scraper log: `scripts/refresh.log`.
-- Revert a bad save: `index.html.bak` is the previous version — rename it back to `index.html`.
+- Backup of the previous site is at `index.html.bak` — rename back to `index.html` to undo a save.
