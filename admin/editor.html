@@ -88,14 +88,6 @@
   .pub-step.err .mark{border-color:#ff6b4a;background:#ff6b4a;color:#fff}
   .pub-step.err .mark::before{content:"!"}
 
-  .game-wrap{background:#12151e;border:1px solid #232838;border-radius:10px;padding:.85rem;text-align:center;max-width:820px;width:100%;display:flex;flex-direction:column;gap:.6rem}
-  .game-wrap h4{font-size:.78rem;letter-spacing:.15em;color:#8b93a8;text-transform:uppercase;font-weight:600}
-  .game-wrap h4 a{color:var(--accent);text-decoration:none;margin-left:.5rem}
-  .game-wrap iframe{width:100%;height:520px;border:0;border-radius:6px;background:#000;display:none}
-  .game-wrap.playing iframe{display:block}
-  .game-wrap .cta{background:var(--accent);color:#1a1306;border:0;padding:.7rem 1.1rem;border-radius:6px;font:inherit;font-weight:700;cursor:pointer;align-self:center}
-  .game-wrap .cta:hover{background:#efb34a}
-  .game-wrap.playing .cta{display:none}
   .pub-close{margin-top:1.4rem;display:none}
   .pub-overlay.done .pub-close{display:inline-block}
   .pub-overlay.done .pub-fox{animation:none;transform:none}
@@ -161,12 +153,6 @@
     <div class="pub-step" id="step2"><span class="mark"></span><span>committing to github</span></div>
     <div class="pub-step" id="step3"><span class="mark"></span><span>netlify rebuilding the site</span></div>
     <div class="pub-step" id="step4"><span class="mark"></span><span>live on thesamwatts.com</span></div>
-  </div>
-
-  <div class="game-wrap" id="gameWrap">
-    <h4>🎮 wanna play a game while you wait? <a href="https://foxbuiltstore.com/games/" target="_blank">(full-screen ↗)</a></h4>
-    <button type="button" class="cta" id="btnPlayGame">play games</button>
-    <iframe id="gameFrame" title="games"></iframe>
   </div>
 
   <button class="btn primary pub-close" id="btnPubClose">done — close</button>
@@ -239,9 +225,12 @@ function renderLibrary(){
     c.className = 'lib-card';
     c.title = (it.caption || '(no caption)');
     const cap = (it.caption || '').replace(/\s+/g, ' ').trim();
+    const thumbSrc = (it.thumb && /^(blob:|data:|https?:)/.test(it.thumb))
+      ? it.thumb
+      : '..' + (it.thumb || '');
     c.innerHTML = `
       <div class="thumb">
-        <img loading="lazy" src="..${it.thumb}">
+        <img loading="lazy" src="${escapeHtml(thumbSrc)}">
         <span class="t ${it.type==='video'?'v':''}">${it.type==='video'?'video':'photo'}</span>
       </div>
       <div class="meta">
@@ -485,9 +474,7 @@ function wire(){
   $('#btnPublish').onclick = publish;
   $('#btnPubClose').onclick = () => {
     $('#pubOverlay').classList.remove('on','done');
-    closeGames();
   };
-  $('#btnPlayGame').onclick = openGames;
   $('#btnUpload').onclick = () => $('#uploadInput').click();
   $('#uploadInput').addEventListener('change', e => {
     handleUpload(e.target.files);
@@ -523,7 +510,6 @@ async function publish(){
   ['step1','step2','step3','step4'].forEach(id => { const s = $('#'+id); s.classList.remove('active','doing','err'); });
   $('#pubTitle').textContent = 'publishing to thesamwatts.com…';
   $('#pubSub').textContent = 'this should take about 60 seconds';
-  closeGames();
 
   markStep('step1', 'doing');
   const html = buildPublishHtml();
@@ -665,19 +651,6 @@ async function handleUpload(fileList){
   renderLibrary();
 }
 
-/* ========= foxbuilt games (reused via iframe) ========= */
-function openGames(){
-  const wrap = $('#gameWrap');
-  const f = $('#gameFrame');
-  if (!f.src) f.src = 'https://foxbuiltstore.com/games/';
-  wrap.classList.add('playing');
-}
-function closeGames(){
-  const wrap = $('#gameWrap');
-  const f = $('#gameFrame');
-  wrap.classList.remove('playing');
-  f.src = ''; // pauses whatever's playing
-}
 
 /* ========= boot ========= */
 if (new URLSearchParams(location.search).get('embedded') === '1') {
