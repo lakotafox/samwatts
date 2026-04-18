@@ -109,83 +109,16 @@
 <div id="adminView" class="view">
   <header>
     <h1>Admin</h1>
-    <span class="badge">demo mode · localStorage</span>
     <nav>
-      <button class="tab active" data-tab="events">Events</button>
-      <button class="tab" data-tab="news">News</button>
-      <button class="tab" data-tab="polaroids">Polaroids</button>
-      <button class="tab" data-tab="settings">Settings</button>
+      <button class="tab active" data-tab="polaroids">Edit Site</button>
     </nav>
     <button class="signout" id="signOut">Sign out</button>
   </header>
 
   <main>
-
-    <!-- EVENTS TAB -->
-    <section id="tab-events" class="tab-panel">
-      <div class="panel">
-        <h2>Upcoming events</h2>
-        <p class="sub">Shown on the dashboard. Newest first. Changes save to localStorage and update live.</p>
-
-        <div id="eventsList"></div>
-
-        <div class="btn-row">
-          <button class="btn ghost" id="addEventBtn">+ Add event</button>
-          <button class="btn" id="saveEvents">Save events</button>
-          <button class="btn secondary" id="resetEvents">Reset to defaults</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- NEWS TAB -->
-    <section id="tab-news" class="tab-panel" style="display:none">
-      <div class="panel">
-        <h2>News / announcements</h2>
-        <p class="sub">Shown on the homepage. 3 cards max looks best.</p>
-
-        <div id="newsList"></div>
-
-        <div class="btn-row">
-          <button class="btn ghost" id="addNewsBtn">+ Add announcement</button>
-          <button class="btn" id="saveNews">Save news</button>
-          <button class="btn secondary" id="resetNews">Reset to defaults</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- POLAROIDS TAB — visual click-to-replace editor -->
-    <section id="tab-polaroids" class="tab-panel" style="display:none">
-      <iframe id="editorFrame" class="embedded-editor" title="Visual media editor" src="about:blank"></iframe>
-    </section>
-
-    <!-- SETTINGS TAB -->
-    <section id="tab-settings" class="tab-panel" style="display:none">
-      <div class="panel">
-        <h2>Crew links</h2>
-        <p class="sub">WhatsApp invite + Signal backup group. Pasted URLs show up on the dashboard.</p>
-
-        <div class="field" style="margin-bottom:.9rem">
-          <label>WhatsApp invite URL</label>
-          <input type="url" id="linkWhatsapp" placeholder="https://chat.whatsapp.com/XXXXXXXXX">
-        </div>
-        <div class="field" style="margin-bottom:.9rem">
-          <label>Signal group URL</label>
-          <input type="url" id="linkSignal" placeholder="https://signal.group/#XXXXXXXXX">
-        </div>
-        <div class="btn-row">
-          <button class="btn" id="saveLinks">Save links</button>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h2>Member count</h2>
-        <p class="sub">Shown on the dashboard ("247 in the crew"). Update as the crew grows.</p>
-        <div class="row cols-3">
-          <div class="field"><label>Total m8s</label><input type="number" id="cntTotal" value="247"></div>
-          <div class="field"><label>Online now</label><input type="number" id="cntOnline" value="34"></div>
-          <div class="field" style="align-self:end"><button class="btn" id="saveCounts">Save</button></div>
-        </div>
-      </div>
+    <!-- POLAROIDS/EDIT TAB — visual click-to-replace editor (the only tab now) -->
+    <section id="tab-polaroids" class="tab-panel" style="display:flex">
+      <iframe id="editorFrame" class="embedded-editor" title="Visual site editor" src="about:blank"></iframe>
     </section>
 
     <div id="status" class="status" style="display:none"></div>
@@ -199,7 +132,13 @@ const authed = () => sessionStorage.getItem('sw-admin') === '1';
 const loginView = document.getElementById('loginView');
 const adminView = document.getElementById('adminView');
 const showLogin = () => { loginView.classList.add('active'); adminView.classList.remove('active'); };
-const showAdmin = () => { loginView.classList.remove('active'); adminView.classList.add('active'); render(); };
+const showAdmin = () => {
+  loginView.classList.remove('active');
+  adminView.classList.add('active');
+  render();
+  // Only tab now is the editor — open it automatically.
+  switchTab('polaroids');
+};
 if (authed()) showAdmin();
 document.getElementById('pwGo').onclick = () => {
   const v = document.getElementById('pwIn').value.trim();
@@ -221,170 +160,10 @@ function switchTab(tabName){
   }
 }
 document.querySelectorAll('.tab').forEach(t => t.onclick = () => switchTab(t.dataset.tab));
-document.getElementById('backToAdmin').onclick = () => switchTab('events');
+document.getElementById('backToAdmin').onclick = () => switchTab('polaroids');
 
-// ============ STORAGE KEYS ============
-const KEY = {
-  events:    'samwatts-events',
-  news:      'samwatts-news',
-  polaroids: 'samwatts-polaroids',
-  links:     'samwatts-links',
-  counts:    'samwatts-counts',
-};
-
-// ============ DEFAULTS ============
-const DEFAULT_EVENTS = [
-  {date:'2026-04-19', title:'Monday Pledge Live', meta:'7:00am · IG live + recording · 100 pushups after'},
-  {date:'2026-04-26', title:'Bonfire & cookout',  meta:'Sat · 6pm · Sam\'s backyard · bring a chair'},
-  {date:'2026-05-04', title:'Motorbike ride — the long one', meta:'Sun · 9am · meets at the gas station on Main'},
-  {date:'2026-05-17', title:'Camp weekend',       meta:'Fri–Sun · woods upstate · bibles, axes, coffee'},
-];
-const DEFAULT_NEWS = [
-  {date:'Apr 16, 2026', title:'New site is up.',     body:'Threw out the sales pitch. This is just the front door now. Come through, hang with the m8s, take the pledge.'},
-  {date:'Coming soon',  title:'Monday pledge video.', body:'Every Monday at 7am — hand on heart, then 100 pushups. Drop in on IG live or catch the replay.'},
-  {date:'Coming soon',  title:'Crew meetup.',         body:'Lift. Cookout. Bonfire. Bring a friend, bring a bible, bring a bag of candy. Details dropping in the chat.'},
-];
-
-// ============ STATE ============
-let events = JSON.parse(localStorage.getItem(KEY.events)  || 'null') || structuredClone(DEFAULT_EVENTS);
-let news   = JSON.parse(localStorage.getItem(KEY.news)    || 'null') || structuredClone(DEFAULT_NEWS);
-let links  = JSON.parse(localStorage.getItem(KEY.links)   || '{}');
-let counts = JSON.parse(localStorage.getItem(KEY.counts)  || '{}');
-
-// ============ RENDER ============
-function render() {
-  renderEvents();
-  renderNews();
-  document.getElementById('linkWhatsapp').value = links.whatsapp || '';
-  document.getElementById('linkSignal').value   = links.signal   || '';
-  document.getElementById('cntTotal').value     = counts.total   || 247;
-  document.getElementById('cntOnline').value    = counts.online  || 34;
-}
-
-function renderEvents() {
-  const list = document.getElementById('eventsList');
-  list.innerHTML = '';
-  events.forEach((ev, i) => {
-    const row = document.createElement('div');
-    row.className = 'entry';
-    row.innerHTML = `
-      <div class="entry-head">
-        <strong>${escapeHtml(ev.title || '(untitled)')}</strong>
-        <button type="button" class="entry-del" data-i="${i}">Delete</button>
-      </div>
-      <div class="row cols-3">
-        <div class="field"><label>Date</label><input type="date" data-f="date" data-i="${i}" value="${ev.date||''}"></div>
-        <div class="field"><label>Title</label><input type="text" data-f="title" data-i="${i}" value="${escapeAttr(ev.title||'')}"></div>
-        <div></div>
-      </div>
-      <div class="field" style="margin-top:.5rem"><label>Details / meta</label><input type="text" data-f="meta" data-i="${i}" value="${escapeAttr(ev.meta||'')}"></div>
-    `;
-    list.appendChild(row);
-  });
-  // bind inputs
-  list.querySelectorAll('input').forEach(inp => inp.oninput = e => {
-    const i = +e.target.dataset.i, f = e.target.dataset.f;
-    events[i][f] = e.target.value;
-  });
-  list.querySelectorAll('.entry-del').forEach(b => b.onclick = e => {
-    if (!confirm('Remove this event?')) return;
-    events.splice(+e.target.dataset.i, 1);
-    renderEvents();
-  });
-}
-
-function renderNews() {
-  const list = document.getElementById('newsList');
-  list.innerHTML = '';
-  news.forEach((n, i) => {
-    const row = document.createElement('div');
-    row.className = 'entry';
-    row.innerHTML = `
-      <div class="entry-head">
-        <strong>${escapeHtml(n.title || '(untitled)')}</strong>
-        <button type="button" class="entry-del" data-i="${i}">Delete</button>
-      </div>
-      <div class="row cols-3">
-        <div class="field"><label>Date label</label><input type="text" data-f="date" data-i="${i}" value="${escapeAttr(n.date||'')}"></div>
-        <div class="field"><label>Title</label><input type="text" data-f="title" data-i="${i}" value="${escapeAttr(n.title||'')}"></div>
-        <div></div>
-      </div>
-      <div class="field" style="margin-top:.5rem"><label>Body</label><textarea data-f="body" data-i="${i}">${escapeHtml(n.body||'')}</textarea></div>
-    `;
-    list.appendChild(row);
-  });
-  list.querySelectorAll('input, textarea').forEach(inp => inp.oninput = e => {
-    const i = +e.target.dataset.i, f = e.target.dataset.f;
-    news[i][f] = e.target.value;
-  });
-  list.querySelectorAll('.entry-del').forEach(b => b.onclick = e => {
-    if (!confirm('Remove this announcement?')) return;
-    news.splice(+e.target.dataset.i, 1);
-    renderNews();
-  });
-}
-
-
-// ============ SAVE HANDLERS ============
-function flash(msg, err=false) {
-  const s = document.getElementById('status');
-  s.textContent = msg;
-  s.className = 'status' + (err ? ' err' : '');
-  s.style.display = 'block';
-  clearTimeout(flash._t);
-  flash._t = setTimeout(() => s.style.display = 'none', 3000);
-}
-
-document.getElementById('saveEvents').onclick = () => {
-  localStorage.setItem(KEY.events, JSON.stringify(events));
-  flash(`Saved ${events.length} events.`);
-};
-document.getElementById('addEventBtn').onclick = () => {
-  events.push({date:'', title:'New event', meta:''});
-  renderEvents();
-};
-document.getElementById('resetEvents').onclick = () => {
-  if (!confirm('Reset all events to defaults?')) return;
-  localStorage.removeItem(KEY.events);
-  events = structuredClone(DEFAULT_EVENTS);
-  renderEvents(); flash('Events reset to defaults.');
-};
-
-document.getElementById('saveNews').onclick = () => {
-  localStorage.setItem(KEY.news, JSON.stringify(news));
-  flash(`Saved ${news.length} announcements.`);
-};
-document.getElementById('addNewsBtn').onclick = () => {
-  news.push({date:'Today', title:'New announcement', body:''});
-  renderNews();
-};
-document.getElementById('resetNews').onclick = () => {
-  if (!confirm('Reset announcements to defaults?')) return;
-  localStorage.removeItem(KEY.news);
-  news = structuredClone(DEFAULT_NEWS);
-  renderNews(); flash('News reset to defaults.');
-};
-
-document.getElementById('saveLinks').onclick = () => {
-  links = {
-    whatsapp: document.getElementById('linkWhatsapp').value.trim(),
-    signal:   document.getElementById('linkSignal').value.trim(),
-  };
-  localStorage.setItem(KEY.links, JSON.stringify(links));
-  flash('Links saved.');
-};
-document.getElementById('saveCounts').onclick = () => {
-  counts = {
-    total:  +document.getElementById('cntTotal').value  || 0,
-    online: +document.getElementById('cntOnline').value || 0,
-  };
-  localStorage.setItem(KEY.counts, JSON.stringify(counts));
-  flash('Counts saved.');
-};
-
-// ============ UTIL ============
-function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));}
-function escapeAttr(s){return escapeHtml(s);}
+// Nothing to render — the only tab is the editor iframe.
+function render() {}
 </script>
 </body>
 </html>
