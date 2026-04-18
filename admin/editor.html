@@ -30,6 +30,8 @@
   .btn.primary{background:var(--accent);color:#1a1306;border-color:var(--accent);font-weight:600}
   .btn.primary:hover{background:#efb34a;border-color:#efb34a}
   .btn.ghost{background:transparent}
+  .pagetab{font-size:.76rem;padding:.35rem .7rem;opacity:.7}
+  .pagetab.active{opacity:1;background:var(--panel-2);border-color:#3b415a;color:var(--accent)}
   .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ink-soft);margin-right:4px;vertical-align:baseline}
   .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)}
 
@@ -102,6 +104,10 @@
 
 <div class="topbar">
   <div class="brand">samwatts editor <span>local only</span></div>
+  <div class="pagetabs" style="display:flex;gap:.3rem;margin-left:.5rem">
+    <button class="btn ghost pagetab active" data-page="index.html">landing</button>
+    <button class="btn ghost pagetab" data-page="dashboard.html">dashboard</button>
+  </div>
   <div class="grow"></div>
   <button class="btn" id="btnRevert" title="throw away unsaved edits">revert</button>
   <button class="btn" id="btnSave" title="write changes to index.html on this laptop (preview only)">save draft</button>
@@ -110,7 +116,7 @@
 
 <div class="stage">
   <div class="hint-banner">click any photo or video on the page to <b>replace it</b></div>
-  <iframe id="siteFrame" src="../index.html?edit=1"></iframe>
+  <iframe id="siteFrame" src="../index.html?edit=1" allow="autoplay"></iframe>
 </div>
 
 <aside class="drawer">
@@ -171,6 +177,9 @@ let pendingUploads = {};
 let blobSwaps = {};
 // Count of text edits (separate from media edits since there's no slot id)
 let textEditCount = 0;
+// Which page the editor is currently looking at. Published via the same
+// publish pipeline (function whitelist allows both index.html + dashboard.html).
+let currentPage = 'index.html';
 let selectedEl = null;   // iframe element currently picked
 let selectedSlotId = ''; // stable slot identifier
 let edits = {};          // { slotId: { newSrc, newPoster, newType, caption } }
@@ -296,6 +305,8 @@ function initFrame(){
     '.polaroid-caption','.video-caption',
     '.news-headline','.news-body','.news-date',
     '.quote','.pitch-strong','.hero-kicker','.hero-title','.hero-pitch',
+    // dashboard.html events:
+    '.event-title','.event-meta','.event-date .d','.event-date .m','.kicker','.intro',
     'p','li','blockquote','strong','em','span.pitch-strong'
   ].join(',');
   const seen = new Set();
@@ -538,6 +549,19 @@ function wire(){
     };
   });
   $('#search').addEventListener('input', e => { searchQ = e.target.value; renderLibrary(); });
+  document.querySelectorAll('.pagetab').forEach(btn => {
+    btn.onclick = () => {
+      const page = btn.dataset.page;
+      if (page === currentPage) return;
+      if (Object.keys(edits).length || textEditCount){
+        if (!confirm('You have unsaved edits on this page. Switch anyway? (unsaved changes will be lost)')) return;
+        edits = {}; textEditCount = 0; pendingUploads = {}; blobSwaps = {}; bumpCount();
+      }
+      currentPage = page;
+      document.querySelectorAll('.pagetab').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+      frame.src = '../' + page + '?edit=1&t=' + Date.now();
+    };
+  });
   $('#btnSave').onclick = () => save();
   $('#btnPublish').onclick = publish;
   $('#btnPubClose').onclick = () => {
@@ -593,7 +617,7 @@ async function publish(){
   // include any uploaded files that are actually referenced in the final HTML
   const usedUploads = Object.values(pendingUploads).filter(u => html.includes(u.path));
   const files = [
-    { path: 'index.html', content: html },
+    { path: currentPage, content: html },
     ...usedUploads.map(u => ({ path: u.path, contentB64: u.contentB64 })),
   ];
   markStep('step1', 'active');

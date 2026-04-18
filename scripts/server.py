@@ -92,7 +92,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 files = body.get("files") or []
 
                 # write each file first (HTML or base64 blob)
-                ALLOWED = ("index.html", "assets/published/", "media-browser/index.json")
+                ALLOWED = ("index.html", "dashboard.html", "assets/published/", "media-browser/index.json")
                 for f in files:
                     p = (f.get("path") or "").lstrip("/")
                     if not p or not any(p == a or p.startswith(a) for a in ALLOWED):

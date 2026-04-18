@@ -14,7 +14,7 @@ const DEFAULTS = {
   branch: process.env.GITHUB_BRANCH || 'main',
 };
 
-const ALLOWED_PATHS = /^(index\.html|assets\/published\/.+|media-browser\/index\.json)$/;
+const ALLOWED_PATHS = /^(index\.html|dashboard\.html|assets\/published\/.+|media-browser\/index\.json)$/;
 
 exports.handler = async (event) => {
   const cors = {
